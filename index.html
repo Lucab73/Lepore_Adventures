@@ -203,7 +203,7 @@
 
     /* Spostati più verso l'interno */
     #controlsLeft { 
-        left: 40px; 
+        left: 20px; 
         left: calc(40px + env(safe-area-inset-left));
     }
     #controlsRight { 
@@ -550,10 +550,17 @@
           if (Math.random() > 0.3) coinList.push({ x: centerX, y: py - 40, type: Math.random() > 0.8 ? 'moneybag' : 'banknote', collected: false });
           
           let canSpawnEnemy = false;
+          // REINTRODOTTO CONTROLLO LARGHEZZA:
           if (pw > 130) {
-              if (lvl === 3 && platType === 'falling') { canSpawnEnemy = true; } 
-              else if (lvl === 5 && platType === 'moving') { if (Math.random() > 0.2) canSpawnEnemy = true; } 
-              else {
+              // Se la larghezza è ok, applica le regole speciali
+              if (lvl === 3 && platType === 'falling') {
+                  canSpawnEnemy = true; // 100% su cadenti larghe
+              } else if (lvl === 5 && platType === 'moving') {
+                  // MODIFICA: Niente nemici su piattaforme mobili nel Liv. 5
+                  // È già difficile saltare con i cantieri sotto, il nemico rendeva il salto impossibile.
+                  canSpawnEnemy = false; 
+              } else {
+                  // Logica standard per piattaforme fisse
                   const enemyChance = Math.max(0.15, 0.5 - (lvl * 0.04)); 
                   const adjustedChance = (lvl === 4) ? enemyChance * 0.7 : enemyChance;
                   if (Math.random() > adjustedChance && py <= 420) canSpawnEnemy = true;
