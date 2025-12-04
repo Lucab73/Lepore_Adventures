@@ -3,9 +3,8 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- TITOLO CAMBIATO PER VERIFICA -->
-  <title>Città 30 - FIXED DEFINITIVO</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Città 30 - MOBILE FIXED</title>
   <style>
     /* --- STILE GENERALE --- */
     body {
@@ -16,12 +15,14 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       overflow: hidden;
       user-select: none;
+      -webkit-user-select: none;
       height: 100vh;
       width: 100vw;
       display: flex;
       justify-content: center;
       align-items: center;
       color: white;
+      touch-action: none; /* Disabilita zoom e scroll */
     }
 
     body.game-active {
@@ -42,6 +43,7 @@
 
     * { box-sizing: border-box; }
 
+    /* LAYOUT DI CLICK INIZIALE */
     #clickLayer {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0, 0, 0, 0.95);
@@ -61,6 +63,7 @@
       0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); }
     }
 
+    /* MENU PRINCIPALE - Responsive per Landscape */
     #mainMenuContainer {
       display: none;
       flex-direction: column;
@@ -69,29 +72,42 @@
       width: 100%;
       max-width: 800px;
       z-index: 100;
+      height: 100%; /* Occupa tutta l'altezza per gestire lo scroll se serve */
+      overflow-y: auto; /* Permette lo scroll se lo schermo è troppo basso */
     }
 
     h1 {
-      font-size: 60px;
+      font-size: 50px;
       font-weight: 900;
       text-align: center;
       color: #fbbf24;
       text-shadow: 0 0 15px #000, 0 0 25px #c2410c, 0 0 35px #9a3412;
-      margin: 0 0 10px 0;
+      margin: 10px 0;
       line-height: 1.1;
       font-family: 'Georgia', serif;
     }
 
     #setup {
-      padding: 30px 40px;
+      padding: 20px 30px;
       border-radius: 20px;
       text-align: center;
       backdrop-filter: blur(8px);
       background: rgba(0, 0, 0, 0.75);
       border: 2px solid #d97706;
       box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
-      width: 100%;
+      width: 90%;
       max-width: 600px;
+    }
+
+    /* Media query per schermi bassi (Landscape smartphone) */
+    @media (max-height: 500px) {
+      h1 { font-size: 30px; margin: 5px 0; }
+      h1 span { font-size: 20px !important; }
+      #setup { padding: 10px 20px; }
+      #setup h2 { font-size: 24px !important; margin-bottom: 5px !important; }
+      #setup p { font-size: 14px !important; margin: 2px 0 !important; }
+      .btn { padding: 8px 20px; font-size: 16px; margin-top: 5px; }
+      .level-selector-container { margin-bottom: 5px; padding: 5px 10px; }
     }
 
     .level-selector-container {
@@ -113,43 +129,87 @@
     }
     .btn:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 6px 20px rgba(220, 38, 38, 0.6); }
 
+    /* AREA DI GIOCO */
     #gameArea {
       display: none;
       flex-direction: column;
       align-items: center;
+      justify-content: center; /* Centra verticalmente */
       width: 100%;
-      max-width: 1200px;
-    }
-
-    #gameCanvas {
-      border-radius: 12px;
-      box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
-      background: #000;
-      max-width: 100%;
-      height: auto;
-      max-height: 80vh;
+      height: 100%;
+      position: relative; /* Necessario per i controlli in absolute */
     }
 
     #stats {
-      margin-bottom: 10px; display: flex; gap: 20px; font-size: 18px; font-weight: bold; align-items: center;
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex; gap: 10px; 
+      font-size: 14px; /* Ridotto per mobile */
+      font-weight: bold; align-items: center;
+      z-index: 20;
+      white-space: nowrap;
+      background: rgba(0,0,0,0.5);
+      padding: 5px;
+      border-radius: 10px;
     }
     .stat {
-      background: rgba(66, 32, 15, 0.9); padding: 8px 16px; border-radius: 12px; border: 1px solid #d97706; display: flex; align-items: center; gap: 8px;
+      padding: 4px 8px; border-radius: 8px; border: 1px solid #d97706; display: flex; align-items: center; gap: 5px;
     }
     .stat span { color: #fbbf24; }
 
     #voteStat.critical { animation: pulseRed 0.5s infinite; background: rgba(127, 29, 29, 0.9) !important; }
     #voteStat.falling { animation: shake 0.1s infinite; }
-    @keyframes pulseRed { 0%, 100% { border-color: #dc2626; box-shadow: 0 0 10px #dc2626; } 50% { border-color: #fca5a5; box-shadow: 0 0 20px #fca5a5; } }
-    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-3px); } 75% { transform: translateX(3px); } }
 
-    #powerBarContainer { width: 120px; height: 16px; background: #444; border: 2px solid #fff; border-radius: 8px; overflow: hidden; display: none; }
+    #powerBarContainer { width: 80px; height: 10px; background: #444; border: 2px solid #fff; border-radius: 8px; overflow: hidden; display: none; }
     #powerBar { width: 100%; height: 100%; background: #ef4444; transition: width 0.1s linear; }
 
-    #controls { margin-top: 10px; display: flex; gap: 15px; }
-    .ctrl-btn { width: 80px; height: 70px; background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 12px; color: white; font-size: 30px; cursor: pointer; user-select: none; touch-action: manipulation; }
-    .ctrl-btn:active { background: rgba(251, 191, 36, 0.4); transform: scale(0.95); }
-    #instructions { font-size: 14px; margin-top: 10px; opacity: 0.8; text-align: center; background: rgba(0, 0, 0, 0.3); padding: 5px 15px; border-radius: 20px; }
+    #gameCanvas {
+      border-radius: 0; /* Rimosso bordo arrotondato per full screen feeling */
+      background: #000;
+      /* Mantiene l'aspect ratio ma si adatta allo schermo */
+      max-width: 100%;
+      max-height: 100%;
+      display: block;
+      box-shadow: 0 0 20px black;
+    }
+
+    /* CONTROLLI TOUCH - OVERLAY */
+    .touch-controls {
+      position: absolute;
+      bottom: 20px;
+      display: flex;
+      gap: 20px;
+      z-index: 50;
+      opacity: 0.6; /* Trasparenti */
+    }
+
+    .touch-controls:active { opacity: 0.9; }
+
+    #controlsLeft { left: 20px; }
+    #controlsRight { right: 20px; }
+
+    .ctrl-btn { 
+      width: 80px; height: 80px; 
+      background: rgba(255, 255, 255, 0.2); 
+      border: 2px solid rgba(255, 255, 255, 0.5); 
+      border-radius: 50%; 
+      color: white; font-size: 30px; 
+      cursor: pointer; user-select: none; 
+      touch-action: manipulation;
+      display: flex; justify-content: center; align-items: center;
+    }
+    .ctrl-btn:active { background: rgba(251, 191, 36, 0.6); transform: scale(0.95); }
+
+    /* Nascondi istruzioni tastiera su mobile */
+    #instructions { 
+        position: absolute; bottom: 5px; font-size: 10px; opacity: 0.5; 
+        pointer-events: none;
+    }
+    @media (hover: none) and (pointer: coarse) {
+        #instructions { display: none; }
+    }
 
   </style>
 </head>
@@ -157,9 +217,9 @@
 <body>
 
   <div id="clickLayer" onclick="unlockAudioAndEnter()">
-    <h1 style="font-size: 60px; margin-bottom: 40px;">Lepore Adventures</h1>
-    <div class="pulse-btn">▶ CLICCA PER ENTRARE</div>
-    <p style="color: #fbbf24; margin-top: 20px; font-size: 16px;">(Abilita l'audio)</p>
+    <h1 style="font-size: 40px; margin-bottom: 20px;">Lepore Adventures</h1>
+    <div class="pulse-btn">▶ TOCCA PER ENTRARE</div>
+    <p style="color: #fbbf24; margin-top: 20px; font-size: 14px;">(Ruota il telefono in orizzontale)</p>
   </div>
 
   <audio id="introMusic" loop>
@@ -168,66 +228,64 @@
 
   <div id="mainMenuContainer">
     <h1>
-      Lepore Adventures:<br>
-      <span style="font-size:36px; color:#fef08a; display:block; margin-top:5px;">Sopravvivi ai dipendenti comunali</span>
+      Lepore Adventures<br>
+      <span style="font-size:24px; color:#fef08a; display:block; margin-top:5px;">Sopravvivi ai dipendenti</span>
     </h1>
 
     <div class="level-selector-container">
-      <label for="levelSelect" style="color: #fbbf24; font-weight: bold; margin-right: 10px; font-size: 18px;">Parti da:</label>
-      <select id="levelSelect" style="padding: 8px; border-radius: 10px; background: #fff; border: 2px solid #d97706; font-weight: bold; cursor: pointer; color: #78350f; font-size: 16px;">
-        <option value="1">Livello 1 - Borgo Panigale - Reno</option>
-        <option value="2">Livello 2 - Santo Stefano</option>
-        <option value="3">Livello 3 - Savena (Crolli)</option>
-        <option value="4">Livello 4 - Navile (Notte)</option>
-        <option value="5">Livello 5 - Porto - Saragozza(Cantieri)</option>
-        <option value="6">Livello 6 - San Donato - San Vitale (Runner)</option>
-        <option value="7">Livello 7 - BOSS FINALE</option>
+      <label for="levelSelect" style="color: #fbbf24; font-weight: bold; margin-right: 10px; font-size: 16px;">Livello:</label>
+      <select id="levelSelect" style="padding: 5px; border-radius: 10px; background: #fff; border: 2px solid #d97706; font-weight: bold; cursor: pointer; color: #78350f; font-size: 16px;">
+        <option value="1">1 - Borgo Panigale</option>
+        <option value="2">2 - Santo Stefano</option>
+        <option value="3">3 - Savena (Crolli)</option>
+        <option value="4">4 - Navile (Notte)</option>
+        <option value="5">5 - Porto (Cantieri)</option>
+        <option value="6">6 - San Donato (Runner)</option>
+        <option value="7">7 - BOSS FINALE</option>
       </select>
     </div>
 
     <div id="setup">
-      <h2 style="text-align:center; font-size: 42px; color: #ffffff; text-shadow: 0 0 10px #ea580c; margin: 0 0 15px 0;">
+      <h2 style="font-size: 32px; color: #ffffff; text-shadow: 0 0 10px #ea580c; margin: 0 0 10px 0;">
         Benvenuto, Sindaco!
       </h2>
-      <p style="margin: 5px 0; color: #fed7aa; font-size: 18px; line-height: 1.4;">
-        Taglia fondi, raccogli monete, evita i dipendenti inferociti.<br>
-        E soprattutto…
+      <p style="margin: 5px 0; color: #fed7aa; font-size: 16px;">
+        Taglia fondi, raccogli monete, licenzia con il cartello "30".
       </p>
-      <p style="margin: 10px 0; font-size: 24px;">
-        <strong style="color: #ef4444; text-transform: uppercase; text-shadow: 0 0 5px rgba(0,0,0,0.5);">NON FARTI SFIDUCIARE!</strong>
-      </p>
-      <p style="margin: 10px 0; color: #fde68a; font-size: 20px; font-weight: 500;">
-        Attraversa tutti i Quartieri della Città.
-      </p>
-      <p style="margin: 0 0 20px 0; color:#ef4444; font-weight:bold; font-size: 18px;">
-        Trova il cartello "30" per LICENZIARE i dipendenti!
+      <p style="margin: 5px 0; font-size: 18px;">
+        <strong style="color: #ef4444;">NON FARTI SFIDUCIARE!</strong>
       </p>
       <div id="loadingStatus" class="loading-text">Caricamento risorse...</div>
-      <button class="btn" id="startBtn" onclick="startGame()" style="display:none;">▶️ Inizia Mandato</button>
-      <p style="font-size: 22px; font-weight: bold; margin-top: 25px; margin-bottom: 0; color: #fbbf24; text-transform: uppercase; letter-spacing: 1px;">
-        BUON DIVERTIMENTO
-      </p>
+      <button class="btn" id="startBtn" onclick="startGame()" style="display:none;">▶️ Inizia</button>
     </div>
   </div>
 
   <div id="gameArea">
     <div id="stats">
-      <div class="stat">💰 Fondi: <span id="coins">0</span></div>
-      <div class="stat">🏛️ Livello: <span id="level">1</span></div>
-      <div class="stat" id="voteStat">📊 Consenso: <span id="lives">40000</span></div>
-      <div class="stat" id="powerStat" style="display:none; gap:10px;"><span>⛔ 30km/h:</span>
+      <div class="stat">💰 <span id="coins">0</span></div>
+      <div class="stat">🏛️ <span id="level">1</span></div>
+      <div class="stat" id="voteStat">📊 <span id="lives">40000</span></div>
+      <div class="stat" id="powerStat" style="display:none; gap:5px;"><span>⛔</span>
         <div id="powerBarContainer">
           <div id="powerBar"></div>
         </div>
       </div>
     </div>
+    
     <canvas id="gameCanvas" width="1024" height="576"></canvas>
-    <div id="controls">
-      <button class="ctrl-btn" id="btnLeft">⬅️</button>
-      <button class="ctrl-btn" id="btnJump">🚀</button>
-      <button class="ctrl-btn" id="btnRight">➡️</button>
+    
+    <!-- Pulsante Salto a SINISTRA -->
+    <div id="controlsLeft" class="touch-controls">
+        <button class="ctrl-btn" id="btnJump">🚀</button>
     </div>
-    <div id="instructions">Tastiera: Frecce/WASD + Spazio | Raccogli il cartello per combattere!</div>
+
+    <!-- Pulsanti Movimento a DESTRA -->
+    <div id="controlsRight" class="touch-controls">
+        <button class="ctrl-btn" id="btnLeft">⬅️</button>
+        <button class="ctrl-btn" id="btnRight">➡️</button>
+    </div>
+    
+    <div id="instructions">Tastiera: Frecce + Spazio</div>
   </div>
 
   <script>
@@ -250,38 +308,22 @@
     const imgBolognaIntro = new Image();
     let imagesLoaded = 0;
     
-    // --- GESTIONE MUSICA DINAMICA ---
-    let backgroundMusic = null; // Inizializziamo vuoto
+    let backgroundMusic = null; 
     
-    // LISTA COLONNE SONORE (Sostituisci i nomi dei file qui sotto!)
     const musicTracks = [
-        "Livello 1.mp3", // Livello 1 - Borgo Panigale
-        "Livello 2.mp3", // Livello 2 - Santo Stefano
-        "Livello 3.mp3", // Livello 3 - Savena (Crolli)
-        "Livello 4.mp3", // Livello 4 - Navile (Notte)
-        "Livello 5.mp3", // Livello 5 - Porto (Cantieri)
-        "Livello 6.mp3", // Livello 6 - San Donato (Runner)
-        "Livello 7.mp3"  // Livello 7 - Boss Finale
+        "Livello 1.mp3", "Livello 2.mp3", "Livello 3.mp3", "Livello 4.mp3", 
+        "Livello 5.mp3", "Livello 6.mp3", "Livello 7.mp3"
     ];
 
-    // Funzione per cambiare traccia
     function playMusicForLevel(lvl) {
-        // 1. Ferma la musica precedente se esiste
         if (backgroundMusic) {
             backgroundMusic.pause();
             backgroundMusic.currentTime = 0;
         }
-
-        // 2. Seleziona il file giusto (l'array parte da 0, i livelli da 1)
-        // Se il livello è > 7 o invalido, usa la prima traccia come fallback
         let trackName = musicTracks[lvl - 1] || musicTracks[0];
-
-        // 3. Crea il nuovo oggetto audio e avvia
         backgroundMusic = new Audio(trackName);
         backgroundMusic.loop = true;
         backgroundMusic.volume = 0.3; 
-        
-        // Avvia solo se l'utente ha già interagito (gioco attivo)
         if (isGameRunning) {
             backgroundMusic.play().catch(e => console.log("Attesa interazione utente per audio:", e));
         }
@@ -408,7 +450,6 @@
     }
 
     function generateLevel(lvl) {
-      // --- PULIZIA TOTALE ---
       platforms = []; coinList = []; particles = []; enemies = []; 
       powerups = []; floatTexts = []; buildings = []; farBuildings = []; 
       clouds = []; obstacles = []; atmospherics = []; bosses = []; 
@@ -421,7 +462,6 @@
       const levelWidth = (lvl === 7) ? 1200 : (lvl === 6) ? 6000 : (4500 + lvl * 1500);
 
       if (lvl === 7) {
-        // --- BOSS LEVEL (Invariato) ---
         isBossLevel = true; bossIntroTimer = 180; playerFrozen = true; showingQuartiere = false; player.powerUpTimer = 999999;
         platforms.push({ x: 0, y: groundY, w: 1024, h: 100, type: 'street', vx: 0 });
         platforms.push({ x: 380, y: 380, w: 260, h: 20, type: 'balcony', vx: 0 });
@@ -433,48 +473,35 @@
         ];
         goal = null;
       } else {
-        // --- LIVELLI STANDARD ---
         isBossLevel = false; generateBackgrounds(levelWidth - 1000); showingQuartiere = true; quartiereTimer = 120; playerFrozen = true;
         
         platforms.push({ x: 0, y: groundY, w: levelWidth, h: 100, type: 'street', vx: 0 });
         
-        // Partiamo da 900 invece di 600 per evitare spawn kill immediati
         if (lvl === 5) { for (let i = 900; i < levelWidth - 800; i += Math.random() * 800 + 400) { obstacles.push({ x: i, y: groundY - 50, w: 60, h: 50 }); } }
         
         let px = 400; 
         let lastPlatform = { x: 0, y: groundY, w: 400 }; 
         let powerupsSpawned = 0; 
-        
-        // Contatori per logiche di generazione
         let consecutiveHighPlatforms = 0;
-        let consecutiveFalling = 0; // NUOVO: Conta le piattaforme cadenti consecutive
+        let consecutiveFalling = 0;
 
         while (px < levelWidth - 800) {
           const pw = 120 + Math.random() * 150; 
           let gapX = 100 + Math.random() * (140 - lvl * 5); 
-          
-          // --- LOGICA ALTEZZA SICURA ---
           let py;
           let isHighTier = false;
 
           if (lastPlatform.y > 330) {
-             // Se ero basso, tendo a salire (60%)
              if (Math.random() > 0.4) isHighTier = true;
           } else {
              consecutiveHighPlatforms++;
-             if (consecutiveHighPlatforms >= 2) { 
-                 isHighTier = false; // Forza discesa
-                 consecutiveHighPlatforms = 0; 
-             } else { 
-                 isHighTier = Math.random() > 0.5; 
-             }
+             if (consecutiveHighPlatforms >= 2) { isHighTier = false; consecutiveHighPlatforms = 0; } else { isHighTier = Math.random() > 0.5; }
           }
 
           if (isHighTier) {
-              py = 200 + Math.random() * 60; // Alto
+              py = 200 + Math.random() * 60; 
               if (lastPlatform.y > 330) gapX = Math.max(50, gapX - 40); 
           } else {
-              // MODIFICA: Abbassiamo la y base da 300 a 350 per renderle più accessibili e visivamente "basse"
               py = 320 + Math.random() * 40; 
               consecutiveHighPlatforms = 0;
           }
@@ -482,24 +509,15 @@
           px = lastPlatform.x + lastPlatform.w + gapX; 
           if (px >= levelWidth - 800) break;
 
-          // --- LOGICA TIPO PIATTAFORMA ---
           let platType = 'balcony';
           let movingProps = { vx: 0 };
 
           if (lvl === 3) {
-              if (Math.random() > 0.3 && consecutiveFalling < 2) {
-                  platType = 'falling';
-                  consecutiveFalling++;
-              } else {
-                  platType = 'balcony';
-                  consecutiveFalling = 0;
-              }
+              if (Math.random() > 0.3 && consecutiveFalling < 2) { platType = 'falling'; consecutiveFalling++; } else { platType = 'balcony'; consecutiveFalling = 0; }
           }
           
-          // Logica Livello 5 (Mobili) - FIX TREMOLIO
           if (lvl === 5 && Math.random() > 0.4) { 
               platType = 'moving';
-              // MODIFICA: Inizializziamo px spostato di +40 per partire AL CENTRO del movimento, non sul bordo
               px += 40; 
               movingProps = { vx: 2, originalVx: 2, minX: px - 40, maxX: px + 40 }; 
           }
@@ -509,22 +527,13 @@
           lastPlatform = platform; 
           const centerX = px + pw / 2;
 
-          // Monete
           if (Math.random() > 0.3) coinList.push({ x: centerX, y: py - 40, type: Math.random() > 0.8 ? 'moneybag' : 'banknote', collected: false });
           
-          // --- LOGICA SPAWN NEMICI (CORRETTA) ---
           let canSpawnEnemy = false;
-          
-          // REINTRODOTTO CONTROLLO LARGHEZZA:
-          // Nessun nemico su piattaforme < 130px, indipendentemente dal tipo.
           if (pw > 130) {
-              // Se la larghezza è ok, applica le regole speciali
-              if (lvl === 3 && platType === 'falling') {
-                  canSpawnEnemy = true; // 100% su cadenti larghe
-              } else if (lvl === 5 && platType === 'moving') {
-                  if (Math.random() > 0.2) canSpawnEnemy = true; // 80% su mobili larghe
-              } else {
-                  // Logica standard
+              if (lvl === 3 && platType === 'falling') { canSpawnEnemy = true; } 
+              else if (lvl === 5 && platType === 'moving') { if (Math.random() > 0.2) canSpawnEnemy = true; } 
+              else {
                   const enemyChance = Math.max(0.15, 0.5 - (lvl * 0.04)); 
                   const adjustedChance = (lvl === 4) ? enemyChance * 0.7 : enemyChance;
                   if (Math.random() > adjustedChance && py <= 420) canSpawnEnemy = true;
@@ -534,36 +543,14 @@
           if (canSpawnEnemy) { 
             let speed = (lvl >= 4) ? 4 + lvl * 0.2 : 2 + lvl * 0.5;
             if (lvl === 5 && platType === 'moving') speed = speed * 0.4;
-            
-            // Collega il nemico alla piattaforma
             let parentRef = null;
-            if (platType === 'falling' || platType === 'moving') {
-              parentRef = platform;
-            }
-            
-            enemies.push({ 
-                x: centerX, 
-                y: py - 70, 
-                width: 50, 
-                height: 70, 
-                vx: speed, 
-                originalVx: speed, 
-                facing: 1, 
-                type: 'normal', 
-                platformX: px, 
-                platformW: pw, 
-                walkFrame: 0, 
-                state: 'walking', 
-                timer: 200, 
-                currentPhrase: "", 
-                isFired: false, 
-                parentPlatform: parentRef
-            }); 
+            if (platType === 'falling' || platType === 'moving') { parentRef = platform; }
+            enemies.push({ x: centerX, y: py - 70, width: 50, height: 70, vx: speed, originalVx: speed, facing: 1, type: 'normal', platformX: px, platformW: pw, walkFrame: 0, state: 'walking', timer: 200, currentPhrase: "", isFired: false, parentPlatform: parentRef }); 
           }
           if (Math.random() > 0.85 && powerupsSpawned < 2) { powerups.push({ x: px + gapX / 2, y: groundY - 50, collected: false }); powerupsSpawned++; }
         }
         
-        // Strikers a terra (LOGICA "COPPIE SÌ, FOLLE NO")
+        // Strikers a terra
         if (lvl >= 2) { 
             const strikerCount = Math.min(4 + lvl, Math.max(1, Math.floor(enemies.length * (0.2 + lvl * 0.05)))); 
             let createdStrikers = 0;
@@ -574,51 +561,17 @@
                 let sX = 800 + Math.random() * (levelWidth - 1600);
                 let safePosition = true;
 
-                // 1. ZONA DI RISPETTO OSTIACOLI (Solo Livello 5)
-                // Manteniamo questo per non farli spawnare DENTRO i cantieri
-                if (lvl === 5) {
-                    for (let obs of obstacles) {
-                        if (Math.abs(sX - obs.x) < 120) {
-                            safePosition = false;
-                            break;
-                        }
-                    }
-                }
-
-                // 2. CONTROLLO AFFOLLAMENTO (Max 2 vicini)
+                if (lvl === 5) { for (let obs of obstacles) { if (Math.abs(sX - obs.x) < 120) { safePosition = false; break; } } }
                 if (safePosition) {
                     let neighbors = 0;
                     for (let e of enemies) {
-                        // Controlliamo in un raggio di 350px
-                        if (e.type === 'striker' && Math.abs(sX - e.x) < 350) {
-                            neighbors++;
-                        }
+                        if (e.type === 'striker' && Math.abs(sX - e.x) < 350) { neighbors++; }
                     }
-                    // Se ci sono già 2 (o più) nemici in zona, non aggiungerne un terzo.
-                    // Risultato: Massimo coppie, mai trii o gruppi da 5.
-                    if (neighbors >= 2) {
-                        safePosition = false;
-                    }
+                    if (neighbors >= 2) { safePosition = false; }
                 }
 
                 if (safePosition) {
-                    enemies.push({ 
-                        x: sX, 
-                        y: groundY - 70, 
-                        width: 50, 
-                        height: 70, 
-                        vx: 0, 
-                        originalVx: 0, 
-                        facing: 1, 
-                        type: 'striker', 
-                        platformX: 0, 
-                        platformW: levelWidth, 
-                        walkFrame: 0, 
-                        state: 'idle', 
-                        timer: 0, 
-                        currentPhrase: "", 
-                        isFired: false 
-                    }); 
+                    enemies.push({ x: sX, y: groundY - 70, width: 50, height: 70, vx: 0, originalVx: 0, facing: 1, type: 'striker', platformX: 0, platformW: levelWidth, walkFrame: 0, state: 'idle', timer: 0, currentPhrase: "", isFired: false }); 
                     createdStrikers++;
                 }
             } 
@@ -627,41 +580,18 @@
         goal = { x: levelWidth - 400, y: groundY - 280, reached: false };
       }
       
-      // Filtro Sicurezza Finale
       enemies = enemies.filter(e => e.x > 250 && e.y > 50);
       resetPlayerPos(); player.vy = 0; if (lvl === 7) player.powerUpTimer = 999999;
     }
 
     function resetPlayerPos() {
-      // Reset posizione giocatore
-      player.x = 100; 
-      player.y = 300; 
-      player.vx = 0; 
-      player.vy = 0; 
-      cameraX = 0; 
-      player.onGround = false; 
-      player.powerUpTimer = 0;
-
-      // Reset Nemici
+      player.x = 100; player.y = 300; player.vx = 0; player.vy = 0; cameraX = 0; player.onGround = false; player.powerUpTimer = 0;
       enemies.forEach(e => { 
         if (!e.isFired) { 
-          // Reset comportamenti
-          e.state = e.type === 'striker' ? 'idle' : 'walking'; 
-          e.timer = 200; 
-          e.currentPhrase = ""; 
-          e.vx = e.type === 'striker' ? 0 : e.originalVx * e.facing; 
-          
-          // --- FIX ANTI SPAWN-KILL ---
-          // Se un nemico di terra (Striker) è entrato nella "Base" (X < 500),
-          // lo rispediamo lontano (tra 700 e 1000) per dare respiro al giocatore.
-          if (e.type === 'striker' && e.x < 500) {
-              e.x = 700 + Math.random() * 400;
-              e.vx = 0; // Lo fermiamo
-              e.state = 'idle'; // Lo calmiamo
-          }
+          e.state = e.type === 'striker' ? 'idle' : 'walking'; e.timer = 200; e.currentPhrase = ""; e.vx = e.type === 'striker' ? 0 : e.originalVx * e.facing; 
+          if (e.type === 'striker' && e.x < 500) { e.x = 700 + Math.random() * 400; e.vx = 0; e.state = 'idle'; }
         } 
       });
-
       if (level === 7) player.powerUpTimer = 999999;
     }
 
@@ -901,25 +831,20 @@
       manageAtmosphere();
       drawPlayer();
       
-      // MODIFICA: Disegna le particelle "voto" (quadratini bianchi e rossi)
       for (let i = particles.length - 1; i >= 0; i--) { 
           let p = particles[i]; 
           p.x += p.vx; 
           p.y += p.vy; 
           p.life--; 
-          
           if (p.type === 'vote') {
-              // Disegna scheda elettorale
               ctx.fillStyle = '#fff';
               ctx.fillRect(p.x - cameraX, p.y, 8, 10);
               ctx.fillStyle = '#ef4444';
-              ctx.fillRect(p.x - cameraX + 2, p.y + 3, 4, 2); // Simbolo rosso sulla scheda
+              ctx.fillRect(p.x - cameraX + 2, p.y + 3, 4, 2); 
           } else {
-              // Particelle normali
               ctx.fillStyle = p.color; 
               ctx.fillRect(p.x - cameraX, p.y, 4, 4); 
           }
-          
           if (p.life <= 0) particles.splice(i, 1); 
       }
       
@@ -963,22 +888,16 @@
             lives -= 500; 
             if (lives < targetLives) lives = targetLives; 
             if (lives < 0) lives = 0;
-            
-            // MODIFICA: Formattazione migliaia
             document.getElementById('lives').textContent = lives.toLocaleString('it-IT'); 
-            
-            // MODIFICA: Audio rallentato (ogni 5 frame invece che random)
             if (deathTimer % 5 === 0) playCounterSound(); 
-
-            // MODIFICA: Genera effetto voti che volano via
             for(let k=0; k<2; k++) {
                 particles.push({ 
                     x: player.x + player.width/2 + (Math.random()-0.5)*40, 
                     y: player.y + 20, 
                     vx: (Math.random() - 0.5) * 6, 
-                    vy: -Math.random() * 5 - 2, // Vanno verso l'alto
+                    vy: -Math.random() * 5 - 2, 
                     life: 60 + Math.random() * 30, 
-                    type: 'vote' // Tipo speciale per disegnarli come schede
+                    type: 'vote' 
                 });
             }
         }
@@ -1028,11 +947,10 @@
       player.y += player.vy; 
       player.onGround = false;
 
-     platforms.forEach(pl => {
+      platforms.forEach(pl => {
         if (pl.type === 'moving') { 
             pl.vx = pl.vx || 0; 
             pl.x += pl.vx; 
-            // MODIFICA: Clamping forzato per evitare tremolio sui bordi
             if (pl.x < pl.minX) { pl.x = pl.minX; pl.vx = Math.abs(pl.vx); }
             else if (pl.x > pl.maxX) { pl.x = pl.maxX; pl.vx = -Math.abs(pl.vx); }
         }
@@ -1113,7 +1031,6 @@
                         setTimeout(() => { 
                             level++; 
                             if (level > 7) { 
-                                // Reset se finisci il gioco
                                 level = 1; coins = 0; lives = 40000; 
                                 document.getElementById('coins').textContent = 0; 
                                 document.getElementById('lives').textContent = lives.toLocaleString('it-IT'); 
@@ -1122,10 +1039,7 @@
                             playerOpacity = 1; 
                             showFlag = false; 
                             flagHeight = 0; 
-                            
-                            // --- MODIFICA: CAMBIA LA MUSICA QUI ---
                             playMusicForLevel(level);
-                            
                             generateLevel(level); 
                         }, 1500); 
                     } 
@@ -1187,10 +1101,8 @@
       document.getElementById('level').textContent = level;
       lives = 40000; targetLives = 40000;
       
-      // Formattazione migliaia iniziale
       document.getElementById('lives').textContent = lives.toLocaleString('it-IT');
 
-      // --- MODIFICA: AVVIA MUSICA SPECIFICA DEL LIVELLO ---
       playMusicForLevel(level);
       resetPlayerPos();
       player.onGround = false; player.facing = 1; player.walkFrame = 0; player.walkTimer = 0; player.powerUpTimer = 0;
@@ -1203,11 +1115,21 @@
       canvas = document.getElementById('gameCanvas');
       ctx = canvas.getContext('2d');
 
+      // Funzione per calcolare le coordinate del mouse/touch scalate sul canvas reale
+      function getScaledPos(canvas, evt) {
+          var rect = canvas.getBoundingClientRect();
+          var clientX = evt.clientX || (evt.touches && evt.touches[0].clientX);
+          var clientY = evt.clientY || (evt.touches && evt.touches[0].clientY);
+          return {
+              x: (clientX - rect.left) * (canvas.width / rect.width),
+              y: (clientY - rect.top) * (canvas.height / rect.height)
+          };
+      }
+
       canvas.addEventListener('mousemove', (e) => {
         if (!showDonationScreen || donationStep !== 1) return;
-        const rect = canvas.getBoundingClientRect();
-        const mouseX = e.clientX - rect.left; const mouseY = e.clientY - rect.top;
-        if (mouseX >= buttonYesRect.x && mouseX <= buttonYesRect.x + buttonYesRect.w && mouseY >= buttonYesRect.y && mouseY <= buttonYesRect.y + buttonYesRect.h) {
+        const pos = getScaledPos(canvas, e);
+        if (pos.x >= buttonYesRect.x && pos.x <= buttonYesRect.x + buttonYesRect.w && pos.y >= buttonYesRect.y && pos.y <= buttonYesRect.y + buttonYesRect.h) {
           playSound('bonk'); noAttempts++;
           const positionLeft = canvas.width / 2 - 170; const positionRight = buttonNoRect.x + buttonNoRect.w + 30;
           if (buttonYesRect.x === positionLeft) buttonYesRect.x = positionRight; else buttonYesRect.x = positionLeft;
@@ -1215,35 +1137,35 @@
         }
       });
 
-      canvas.addEventListener('click', (e) => {
-        const rect = canvas.getBoundingClientRect(); const clickX = e.clientX - rect.left; const clickY = e.clientY - rect.top;
+      function handleCanvasClick(e) {
+        const pos = getScaledPos(canvas, e);
+        
+        // Game Over Screen
         if (showGameOver) {
-          if (clickX >= gameOverButtonPlay.x && clickX <= gameOverButtonPlay.x + gameOverButtonPlay.w && clickY >= gameOverButtonPlay.y && clickY <= gameOverButtonPlay.y + gameOverButtonPlay.h) {
+          if (pos.x >= gameOverButtonPlay.x && pos.x <= gameOverButtonPlay.x + gameOverButtonPlay.w && pos.y >= gameOverButtonPlay.y && pos.y <= gameOverButtonPlay.y + gameOverButtonPlay.h) {
             playSound('coin'); 
             const introMusic = document.getElementById("introMusic");
-            if (introMusic) {
-                introMusic.pause();
-                introMusic.currentTime = 0;
-            }
+            if (introMusic) { introMusic.pause(); introMusic.currentTime = 0; }
             const selectedLevel = parseInt(document.getElementById('levelSelect').value); level = selectedLevel; document.getElementById('level').textContent = level;
             showGameOver = false; lives = 40000; targetLives = 40000; coins = 0; playerFrozen = false; 
-            
-            // MODIFICA: Formattazione al riavvio
             document.getElementById('lives').textContent = lives.toLocaleString('it-IT'); 
-            
             document.getElementById('coins').textContent = 0;
             if (level === 7) { coins = 500; document.getElementById('coins').textContent = coins; }
-            // --- MODIFICA: CAMBIA MUSICA QUANDO SI RIGIOCA ---
             playMusicForLevel(level);
             generateLevel(level); 
           }
-          if (clickX >= gameOverButtonMenu.x && clickX <= gameOverButtonMenu.x + gameOverButtonMenu.w && clickY >= gameOverButtonMenu.y && clickY <= gameOverButtonMenu.y + gameOverButtonMenu.h) { location.reload(); }
+          if (pos.x >= gameOverButtonMenu.x && pos.x <= gameOverButtonMenu.x + gameOverButtonMenu.w && pos.y >= gameOverButtonMenu.y && pos.y <= gameOverButtonMenu.y + gameOverButtonMenu.h) { location.reload(); }
           return;
         }
-        if (!showDonationScreen || donationStep !== 1) return;
-        if (clickX >= buttonNoRect.x && clickX <= buttonNoRect.x + buttonNoRect.w && clickY >= buttonNoRect.y && clickY <= buttonNoRect.y + buttonNoRect.h) { playSound('die'); donationStep = 2; stepTimer = 240; }
-        if (clickX >= buttonYesRect.x && clickX <= buttonYesRect.x + buttonYesRect.w && clickY >= buttonYesRect.y && clickY <= buttonYesRect.y + buttonYesRect.h) { playSound('bonk'); }
-      });
+
+        // Donation Screen
+        if (showDonationScreen && donationStep === 1) {
+            if (pos.x >= buttonNoRect.x && pos.x <= buttonNoRect.x + buttonNoRect.w && pos.y >= buttonNoRect.y && pos.y <= buttonNoRect.y + buttonNoRect.h) { playSound('die'); donationStep = 2; stepTimer = 240; }
+            if (pos.x >= buttonYesRect.x && pos.x <= buttonYesRect.x + buttonYesRect.w && pos.y >= buttonYesRect.y && pos.y <= buttonYesRect.y + buttonYesRect.h) { playSound('bonk'); }
+        }
+      }
+
+      canvas.addEventListener('click', handleCanvasClick);
 
       generateLevel(level);
       gameLoopFn();
@@ -1251,8 +1173,20 @@
 
     window.addEventListener('keydown', e => { if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = true; if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = true; if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') { keys.jump = true; e.preventDefault(); } });
     window.addEventListener('keyup', e => { if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = false; if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = false; if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') keys.jump = false; });
-    const touchSetup = (id, k) => { const b = document.getElementById(id); b.addEventListener('touchstart', (e) => { e.preventDefault(); keys[k] = true; }); b.addEventListener('touchend', (e) => { e.preventDefault(); keys[k] = false; }); b.addEventListener('mousedown', () => { keys[k] = true; }); b.addEventListener('mouseup', () => { keys[k] = false; }); };
-    touchSetup('btnLeft', 'left'); touchSetup('btnRight', 'right'); touchSetup('btnJump', 'jump');
+    
+    // Supporto Multitouch migliorato
+    const touchSetup = (id, k) => { 
+        const b = document.getElementById(id); 
+        b.addEventListener('touchstart', (e) => { e.preventDefault(); keys[k] = true; }); 
+        b.addEventListener('touchend', (e) => { e.preventDefault(); keys[k] = false; }); 
+        // Mouse fallback per debug desktop
+        b.addEventListener('mousedown', () => { keys[k] = true; }); 
+        b.addEventListener('mouseup', () => { keys[k] = false; }); 
+    };
+    touchSetup('btnLeft', 'left'); 
+    touchSetup('btnRight', 'right'); 
+    touchSetup('btnJump', 'jump');
+
   </script>
 </body>
-</html>
+</html>```
