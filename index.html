@@ -221,6 +221,10 @@
       cursor: pointer; user-select: none; 
       touch-action: manipulation;
       display: flex; justify-content: center; align-items: center;
+      -webkit-touch-callout: none; /* Disabilita menu su iOS/Android */
+      -webkit-user-select: none;
+      user-select: none;
+      touch-action: none; /* Fondamentale! */
     }
     .ctrl-btn:active { background: rgba(251, 191, 36, 0.5); transform: scale(0.95); border-color: #fbbf24; }
 
@@ -1317,49 +1321,77 @@
     window.addEventListener('keydown', e => { if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = true; if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = true; if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') { keys.jump = true; e.preventDefault(); } });
     window.addEventListener('keyup', e => { if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = false; if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = false; if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') keys.jump = false; });
     
-    // --- CONTROLLI TOUCH AVANZATI (FIX PIXEL/ANDROID) ---
-    const touchSetup = (id, k) => { 
-        const b = document.getElementById(id); 
-        
-        // Funzione per attivare
-        const press = (e) => { 
-            if (e.cancelable) e.preventDefault(); 
-            keys[k] = true; 
-        };
-        
-        // Funzione per disattivare
-        const release = (e) => { 
-            if (e.cancelable) e.preventDefault(); 
-            keys[k] = false; 
-        };
-
-        b.addEventListener('touchstart', press, { passive: false });
-        b.addEventListener('touchend', release, { passive: false });
-        
-        // IL FIX VERO: Se il sistema interrompe il tocco (es. gesture Android), ferma il tasto
-        b.addEventListener('touchcancel', release, { passive: false }); 
-        // Se il dito scivola fisicamente fuori dal bottone
-        b.addEventListener('mouseleave', release, { passive: false });
-
-        // Fallback Mouse
-        b.addEventListener('mousedown', () => { keys[k] = true; }); 
-        b.addEventListener('mouseup', () => { keys[k] = false; }); 
-    };
-
-    // RETE DI SICUREZZA GLOBALE
-    // Se l'utente alza tutte le dita dallo schermo, resetta tutti i tasti.
-    // Questo risolve al 100% il problema del "personaggio incantato".
-    window.addEventListener('touchend', (e) => {
-        if (e.touches.length === 0) {
-            keys.left = false;
-            keys.right = false;
-            keys.jump = false;
+    // --- SISTEMA CONTROLLO TOUCH ROBUSTO (POLLING) ---
+    // Questo sistema controlla costantemente dove sono le dita.
+    // Se un dito è sopra un bottone, il bottone è premuto.
+    // Se il dito sparisce (per qualsiasi motivo: gesture, notifiche, ecc.), il bottone si spegne.
+    
+    function handleTouch(e) {
+        // Preveniamo comportamenti di default (zoom, scroll, menu contestuali)
+        if (e.type !== 'touchend') {
+            e.preventDefault();
         }
+
+        // Resettiamo tutti i tasti
+        keys.left = false;
+        keys.right = false;
+        keys.jump = false;
+
+        // Recuperiamo i rettangoli dei pulsanti
+        const btnLeft = document.getElementById('btnLeft').getBoundingClientRect();
+        const btnRight = document.getElementById('btnRight').getBoundingClientRect();
+        const btnJump = document.getElementById('btnJump').getBoundingClientRect();
+
+        // Controlliamo ogni dito presente sullo schermo
+        for (let i = 0; i < e.touches.length; i++) {
+            const touch = e.touches[i];
+            const x = touch.clientX;
+            const y = touch.clientY;
+
+            // Logica di collisione: Il dito è dentro il bottone?
+            // Aggiungiamo un margine di tolleranza (+20px) per dita grandi
+            const tolerance = 20;
+
+            if (x >= btnLeft.left - tolerance && x <= btnLeft.right + tolerance &&
+                y >= btnLeft.top - tolerance && y <= btnLeft.bottom + tolerance) {
+                keys.left = true;
+            }
+            
+            if (x >= btnRight.left - tolerance && x <= btnRight.right + tolerance &&
+                y >= btnRight.top - tolerance && y <= btnRight.bottom + tolerance) {
+                keys.right = true;
+            }
+
+            if (x >= btnJump.left - tolerance && x <= btnJump.right + tolerance &&
+                y >= btnJump.top - tolerance && y <= btnJump.bottom + tolerance) {
+                keys.jump = true;
+            }
+        }
+    }
+
+    // Colleghiamo questo gestore all'intero contenitore di gioco (o ai controlli)
+    // Usiamo 'passive: false' per poter usare preventDefault
+    const controlLayerLeft = document.getElementById('controlsLeft');
+    const controlLayerRight = document.getElementById('controlsRight');
+
+    // Applichiamo i listener ai contenitori dei pulsanti
+    [controlLayerLeft, controlLayerRight].forEach(layer => {
+        layer.addEventListener('touchstart', handleTouch, { passive: false });
+        layer.addEventListener('touchmove', handleTouch, { passive: false });
+        layer.addEventListener('touchend', handleTouch, { passive: false });
+        layer.addEventListener('touchcancel', handleTouch, { passive: false });
     });
 
-    touchSetup('btnLeft', 'left'); 
-    touchSetup('btnRight', 'right'); 
-    touchSetup('btnJump', 'jump');
+    // Fallback Mouse per test su PC (opzionale, ma utile)
+    const mouseBind = (id, k) => {
+        const b = document.getElementById(id);
+        b.addEventListener('mousedown', (e) => { e.preventDefault(); keys[k] = true; });
+        b.addEventListener('mouseup', (e) => { e.preventDefault(); keys[k] = false; });
+        b.addEventListener('mouseleave', (e) => { keys[k] = false; });
+    };
+    mouseBind('btnLeft', 'left');
+    mouseBind('btnRight', 'right');
+    mouseBind('btnJump', 'jump');
 
   </script>
 </body>
