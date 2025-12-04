@@ -1317,15 +1317,46 @@
     window.addEventListener('keydown', e => { if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = true; if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = true; if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') { keys.jump = true; e.preventDefault(); } });
     window.addEventListener('keyup', e => { if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = false; if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = false; if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') keys.jump = false; });
     
-    // Supporto Multitouch migliorato
+    // --- CONTROLLI TOUCH AVANZATI (FIX PIXEL/ANDROID) ---
     const touchSetup = (id, k) => { 
         const b = document.getElementById(id); 
-        b.addEventListener('touchstart', (e) => { e.preventDefault(); keys[k] = true; }); 
-        b.addEventListener('touchend', (e) => { e.preventDefault(); keys[k] = false; }); 
-        // Mouse fallback per debug desktop
+        
+        // Funzione per attivare
+        const press = (e) => { 
+            if (e.cancelable) e.preventDefault(); 
+            keys[k] = true; 
+        };
+        
+        // Funzione per disattivare
+        const release = (e) => { 
+            if (e.cancelable) e.preventDefault(); 
+            keys[k] = false; 
+        };
+
+        b.addEventListener('touchstart', press, { passive: false });
+        b.addEventListener('touchend', release, { passive: false });
+        
+        // IL FIX VERO: Se il sistema interrompe il tocco (es. gesture Android), ferma il tasto
+        b.addEventListener('touchcancel', release, { passive: false }); 
+        // Se il dito scivola fisicamente fuori dal bottone
+        b.addEventListener('mouseleave', release, { passive: false });
+
+        // Fallback Mouse
         b.addEventListener('mousedown', () => { keys[k] = true; }); 
         b.addEventListener('mouseup', () => { keys[k] = false; }); 
     };
+
+    // RETE DI SICUREZZA GLOBALE
+    // Se l'utente alza tutte le dita dallo schermo, resetta tutti i tasti.
+    // Questo risolve al 100% il problema del "personaggio incantato".
+    window.addEventListener('touchend', (e) => {
+        if (e.touches.length === 0) {
+            keys.left = false;
+            keys.right = false;
+            keys.jump = false;
+        }
+    });
+
     touchSetup('btnLeft', 'left'); 
     touchSetup('btnRight', 'right'); 
     touchSetup('btnJump', 'jump');
