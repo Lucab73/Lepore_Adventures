@@ -3,8 +3,8 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Città 30 - MOBILE FIXED</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Città 30 - MOBILE PERFECT</title>
   <style>
     /* --- STILE GENERALE --- */
     body {
@@ -16,13 +16,14 @@
       overflow: hidden;
       user-select: none;
       -webkit-user-select: none;
-      height: 100vh;
+      /* Usa dvh per adattarsi alle barre dinamiche di Android */
+      height: 100dvh;
       width: 100vw;
       display: flex;
       justify-content: center;
       align-items: center;
       color: white;
-      touch-action: none; /* Disabilita zoom e scroll */
+      touch-action: none;
     }
 
     body.game-active {
@@ -63,17 +64,23 @@
       0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); }
     }
 
-    /* MENU PRINCIPALE - Responsive per Landscape */
+    /* MENU PRINCIPALE - FIX SCROLL E LANDSCAPE */
     #mainMenuContainer {
       display: none;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: center; /* Centra se c'è spazio */
       width: 100%;
       max-width: 800px;
       z-index: 100;
-      height: 100%; /* Occupa tutta l'altezza per gestire lo scroll se serve */
-      overflow-y: auto; /* Permette lo scroll se lo schermo è troppo basso */
+      /* FIX SCROLL: Occupa altezza massima e abilita scroll se necessario */
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      overflow-y: auto; 
+      -webkit-overflow-scrolling: touch;
+      padding-top: 20px;
+      padding-bottom: 40px; /* Spazio extra per scrollare fino in fondo */
     }
 
     h1 {
@@ -85,6 +92,7 @@
       margin: 10px 0;
       line-height: 1.1;
       font-family: 'Georgia', serif;
+      flex-shrink: 0; /* Impedisce al titolo di schiacciarsi */
     }
 
     #setup {
@@ -97,17 +105,19 @@
       box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
       width: 90%;
       max-width: 600px;
+      margin-bottom: 20px; /* Spazio sotto per lo scroll */
     }
 
-    /* Media query per schermi bassi (Landscape smartphone) */
+    /* Media query per Landscape Smartphone */
     @media (max-height: 500px) {
-      h1 { font-size: 30px; margin: 5px 0; }
+      #mainMenuContainer { justify-content: flex-start; } /* Allinea in alto per permettere scroll */
+      h1 { font-size: 30px; margin: 10px 0; }
       h1 span { font-size: 20px !important; }
-      #setup { padding: 10px 20px; }
+      #setup { padding: 10px 20px; margin-top: 5px; }
       #setup h2 { font-size: 24px !important; margin-bottom: 5px !important; }
-      #setup p { font-size: 14px !important; margin: 2px 0 !important; }
-      .btn { padding: 8px 20px; font-size: 16px; margin-top: 5px; }
-      .level-selector-container { margin-bottom: 5px; padding: 5px 10px; }
+      #setup p { font-size: 14px !important; margin: 5px 0 !important; }
+      .btn { padding: 8px 20px; font-size: 16px; margin-top: 10px; }
+      .level-selector-container { margin-bottom: 10px; padding: 5px 10px; }
     }
 
     .level-selector-container {
@@ -134,10 +144,10 @@
       display: none;
       flex-direction: column;
       align-items: center;
-      justify-content: center; /* Centra verticalmente */
+      justify-content: center;
       width: 100%;
       height: 100%;
-      position: relative; /* Necessario per i controlli in absolute */
+      position: relative;
     }
 
     #stats {
@@ -146,66 +156,72 @@
       left: 50%;
       transform: translateX(-50%);
       display: flex; gap: 10px; 
-      font-size: 14px; /* Ridotto per mobile */
+      font-size: 14px;
       font-weight: bold; align-items: center;
       z-index: 20;
       white-space: nowrap;
       background: rgba(0,0,0,0.5);
-      padding: 5px;
-      border-radius: 10px;
+      padding: 5px 15px;
+      border-radius: 15px;
     }
     .stat {
-      padding: 4px 8px; border-radius: 8px; border: 1px solid #d97706; display: flex; align-items: center; gap: 5px;
+      padding: 4px 8px; display: flex; align-items: center; gap: 5px;
     }
     .stat span { color: #fbbf24; }
 
-    #voteStat.critical { animation: pulseRed 0.5s infinite; background: rgba(127, 29, 29, 0.9) !important; }
+    #voteStat.critical { animation: pulseRed 0.5s infinite; color: #fca5a5; }
     #voteStat.falling { animation: shake 0.1s infinite; }
 
     #powerBarContainer { width: 80px; height: 10px; background: #444; border: 2px solid #fff; border-radius: 8px; overflow: hidden; display: none; }
     #powerBar { width: 100%; height: 100%; background: #ef4444; transition: width 0.1s linear; }
 
     #gameCanvas {
-      border-radius: 0; /* Rimosso bordo arrotondato per full screen feeling */
       background: #000;
-      /* Mantiene l'aspect ratio ma si adatta allo schermo */
       max-width: 100%;
       max-height: 100%;
       display: block;
       box-shadow: 0 0 20px black;
     }
 
-    /* CONTROLLI TOUCH - OVERLAY */
+    /* CONTROLLI TOUCH - POSIZIONE OTTIMIZZATA */
     .touch-controls {
       position: absolute;
-      bottom: 20px;
+      /* Alzati dal fondo per evitare la barra di navigazione */
+      bottom: 30px; 
+      bottom: calc(30px + env(safe-area-inset-bottom)); 
       display: flex;
-      gap: 20px;
+      gap: 25px;
       z-index: 50;
-      opacity: 0.6; /* Trasparenti */
+      opacity: 0.6;
     }
 
     .touch-controls:active { opacity: 0.9; }
 
-    #controlsLeft { left: 20px; }
-    #controlsRight { right: 20px; }
+    /* Spostati più verso l'interno */
+    #controlsLeft { 
+        left: 40px; 
+        left: calc(40px + env(safe-area-inset-left));
+    }
+    #controlsRight { 
+        right: 40px; 
+        right: calc(40px + env(safe-area-inset-right));
+    }
 
     .ctrl-btn { 
-      width: 80px; height: 80px; 
-      background: rgba(255, 255, 255, 0.2); 
-      border: 2px solid rgba(255, 255, 255, 0.5); 
+      /* Ridotti leggermente (da 80 a 70) */
+      width: 70px; height: 70px; 
+      background: rgba(255, 255, 255, 0.15); 
+      border: 2px solid rgba(255, 255, 255, 0.4); 
       border-radius: 50%; 
-      color: white; font-size: 30px; 
+      color: white; font-size: 28px; 
       cursor: pointer; user-select: none; 
       touch-action: manipulation;
       display: flex; justify-content: center; align-items: center;
     }
-    .ctrl-btn:active { background: rgba(251, 191, 36, 0.6); transform: scale(0.95); }
+    .ctrl-btn:active { background: rgba(251, 191, 36, 0.5); transform: scale(0.95); border-color: #fbbf24; }
 
-    /* Nascondi istruzioni tastiera su mobile */
     #instructions { 
-        position: absolute; bottom: 5px; font-size: 10px; opacity: 0.5; 
-        pointer-events: none;
+        position: absolute; bottom: 5px; font-size: 10px; opacity: 0.5; pointer-events: none;
     }
     @media (hover: none) and (pointer: coarse) {
         #instructions { display: none; }
@@ -1086,7 +1102,26 @@
           big: true 
       });
     }  
-    function gameLoopFn() { if (!isGameRunning) return; update(); drawEverything(); if (isGameRunning) gameLoop = requestAnimationFrame(gameLoopFn); }
+    
+    // --- FIX 60 FPS LOOP ---
+    let lastTime = 0;
+    const fps = 60;
+    const interval = 1000/fps;
+
+    function gameLoopFn(timestamp) {
+        if (!isGameRunning) return;
+        requestAnimationFrame(gameLoopFn);
+
+        const deltaTime = timestamp - lastTime;
+
+        if (deltaTime >= interval) {
+            // Regola il tempo per non saltare frame
+            lastTime = timestamp - (deltaTime % interval);
+
+            update();
+            drawEverything();
+        }
+    }
 
     function startGame() {
       var audio = document.getElementById("introMusic");
@@ -1168,7 +1203,8 @@
       canvas.addEventListener('click', handleCanvasClick);
 
       generateLevel(level);
-      gameLoopFn();
+      // Inizia il loop con timestamp
+      requestAnimationFrame(gameLoopFn);
     }
 
     window.addEventListener('keydown', e => { if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = true; if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = true; if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') { keys.jump = true; e.preventDefault(); } });
@@ -1189,4 +1225,4 @@
 
   </script>
 </body>
-</html>```
+</html>
