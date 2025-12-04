@@ -398,6 +398,7 @@
     
     let isBossLevel = false;
     let bossIntroTimer = 0;
+    let bossOutroTimer = 0;
     let bosses = [];
     let bossProjectiles = [];
     let showingQuartiere = false;
@@ -572,11 +573,29 @@
             if (lvl === 5 && platType === 'moving') speed = speed * 0.4;
             let parentRef = null;
             if (platType === 'falling' || platType === 'moving') { parentRef = platform; }
-            enemies.push({ x: centerX, y: py - 70, width: 50, height: 70, vx: speed, originalVx: speed, facing: 1, type: 'normal', platformX: px, platformW: pw, walkFrame: 0, state: 'walking', timer: 200, currentPhrase: "", isFired: false, parentPlatform: parentRef }); 
-          }
+            enemies.push({ 
+                x: centerX, 
+                y: py - 70, 
+                width: 50, 
+                height: 70, 
+                vx: speed, 
+                originalVx: speed, 
+                facing: 1, 
+                type: 'normal', 
+                platformX: px, 
+                platformW: pw, 
+                walkFrame: 0, 
+                state: 'walking', 
+                // MODIFICA: Timer casuale tra 10 e 300 frame (invece di fisso a 200)
+                // Così ognuno inizierà a parlare in un momento diverso.
+                timer: Math.floor(Math.random() * 290) + 10, 
+                currentPhrase: "", 
+                isFired: false, 
+                parentPlatform: parentRef
+            });
           if (Math.random() > 0.85 && powerupsSpawned < 2) { powerups.push({ x: px + gapX / 2, y: groundY - 50, collected: false }); powerupsSpawned++; }
         }
-        
+        }
         // Strikers a terra
         if (lvl >= 2) { 
             const strikerCount = Math.min(4 + lvl, Math.max(1, Math.floor(enemies.length * (0.2 + lvl * 0.05)))); 
@@ -615,7 +634,13 @@
       player.x = 100; player.y = 300; player.vx = 0; player.vy = 0; cameraX = 0; player.onGround = false; player.powerUpTimer = 0;
       enemies.forEach(e => { 
         if (!e.isFired) { 
-          e.state = e.type === 'striker' ? 'idle' : 'walking'; e.timer = 200; e.currentPhrase = ""; e.vx = e.type === 'striker' ? 0 : e.originalVx * e.facing; 
+          e.state = e.type === 'striker' ? 'idle' : 'walking'; 
+          
+          // MODIFICA: Assegnamo un timer casuale anche qui, altrimenti si sincronizzano tutti al riavvio!
+          e.timer = Math.floor(Math.random() * 300); 
+          
+          e.currentPhrase = ""; 
+          e.vx = e.type === 'striker' ? 0 : e.originalVx * e.facing; 
           if (e.type === 'striker' && e.x < 500) { e.x = 700 + Math.random() * 400; e.vx = 0; e.state = 'idle'; }
         } 
       });
@@ -906,8 +931,37 @@
     }
 
     function update() {
-      if (globalVoiceTimer > 0) globalVoiceTimer--;
-      if (isBossLevel && bossIntroTimer > 0) { bossIntroTimer--; player.vx = 0; player.vy = 0; if (bossIntroTimer <= 0) playerFrozen = false; return; }
+     if (globalVoiceTimer > 0) globalVoiceTimer--;
+     if (isBossLevel && bossIntroTimer > 0) { bossIntroTimer--; player.vx = 0; player.vy = 0; if (bossIntroTimer <= 0) playerFrozen = false; return; }
+      
+      // --- AGGIUNGI QUESTO BLOCCO NUOVO ---
+      if (isBossLevel && bossOutroTimer > 0) {
+          bossOutroTimer--;
+          player.vx = 0; player.vy = 0; // Ferma il giocatore
+          
+          // Effetto Fuochi d'Artificio
+          if (bossOutroTimer % 10 === 0) {
+              const randX = Math.random() * canvas.width;
+              const randY = Math.random() * (canvas.height / 2);
+              createSparkles(randX + cameraX, randY, '#fbbf24'); // Oro
+              createSparkles(randX + cameraX, randY, '#ef4444'); // Rosso
+              createSparkles(randX + cameraX, randY, '#ffffff'); // Bianco
+              playSound('coin'); // Suono festoso
+          }
+
+          if (bossOutroTimer <= 0) {
+              // Quando il tempo scade, mostra la schermata finale
+              showDonationScreen = true; 
+              donationStep = 0; 
+              stepTimer = 360; 
+              noAttempts = 0; 
+              if (backgroundMusic) { backgroundMusic.pause(); } 
+              animatedCoins = 0; animatedFired = 0; animatedStrikers = 0; 
+              buttonYesRect = { x: canvas.width / 2 - 170, y: canvas.height / 2 + 80, w: 150, h: 60 }; 
+              buttonNoRect = { x: canvas.width / 2 + 20, y: canvas.height / 2 + 80, w: 150, h: 60 };
+          }
+          return; // Blocca tutto il resto
+      }
       if (showingQuartiere) { quartiereTimer--; player.vx = 0; player.vy = 0; if (quartiereTimer <= 0) showingQuartiere = false; playerFrozen = false; return; }
       
       if (isDead) {
@@ -1005,7 +1059,27 @@
           if (goal && e.x > goal.x - 300 && e.vx > 0) { e.vx = 0; e.state = 'talking'; }
         } else {
           e.timer--; if (e.timer <= 0) {
-            if (e.state === 'walking') { e.state = 'talking'; e.timer = 180; e.vx = 0; e.currentPhrase = enemyPhrases[Math.floor(Math.random() * enemyPhrases.length)]; const enemyScreenX = e.x - cameraX; const isVisible = enemyScreenX > -100 && enemyScreenX < canvas.width + 100; if (isVisible && globalVoiceTimer <= 0 && voiceMap[e.currentPhrase]) { const sound = voiceMap[e.currentPhrase]; sound.currentTime = 0; sound.play().catch(err => console.log("Audio bloccato:", err)); globalVoiceTimer = 120; } } else { e.state = 'walking'; e.timer = 200; e.vx = e.facing * e.originalVx; }
+            if (e.state === 'walking') { 
+                e.state = 'talking'; 
+                // MODIFICA: Durata della parlata casuale (tra 2 e 4 secondi circa a 60fps)
+                e.timer = 120 + Math.floor(Math.random() * 120); 
+                e.vx = 0; 
+                e.currentPhrase = enemyPhrases[Math.floor(Math.random() * enemyPhrases.length)]; 
+                
+                const enemyScreenX = e.x - cameraX; 
+                const isVisible = enemyScreenX > -100 && enemyScreenX < canvas.width + 100; 
+                if (isVisible && globalVoiceTimer <= 0 && voiceMap[e.currentPhrase]) { 
+                    const sound = voiceMap[e.currentPhrase]; 
+                    sound.currentTime = 0; 
+                    sound.play().catch(err => console.log("Audio bloccato:", err)); 
+                    globalVoiceTimer = 120; 
+                } 
+            } else { 
+                e.state = 'walking'; 
+                // MODIFICA: Durata della camminata casuale (tra 2.5 e 5 secondi)
+                e.timer = 150 + Math.floor(Math.random() * 150); 
+                e.vx = e.facing * e.originalVx; 
+            }
           }
         }
         
@@ -1037,7 +1111,22 @@
           }
           else if (boss.type === 'base') { boss.x += boss.vx; if (boss.x < 200 || boss.x > platforms[0].w - 200) { boss.vx *= -1; boss.facing *= -1; } boss.vy += 0.7; if (boss.vy > 15) boss.vy = 15; boss.y += boss.vy; boss.onGround = false; platforms.forEach(pl => { if (boss.x + boss.width > pl.x && boss.x < pl.x + pl.w && boss.y + boss.height > pl.y && boss.y + boss.height < pl.y + pl.h + 20 && boss.vy >= 0) { boss.y = pl.y - boss.height; boss.vy = 0; boss.onGround = true; } }); boss.jumpTimer--; if (boss.jumpTimer <= 0 && boss.onGround) { boss.jumpTimer = 120; boss.vy = -14; } boss.attackTimer--; if (boss.attackTimer <= 0) { boss.attackTimer = 150; bossProjectiles.push({ type: 'parola', text: "AUMENTA IL FONDO!", x: boss.x + boss.width / 2 + (boss.facing * 60), y: boss.y - 45, vx: boss.facing * 7, vy: 0 }); } }
           
-          if (player.powerUpTimer > 0) { if (boss.invulnTimer > 0) boss.invulnTimer--; if (player.x < boss.x + boss.width && player.x + player.width > boss.x && player.y < boss.y + boss.height && player.y + player.height > boss.y) { if (boss.invulnTimer === 0) { boss.health--; boss.invulnTimer = 120; playSound('bonk'); createSparkles(boss.x + boss.width / 2, boss.y + boss.height / 2, '#fca5a5'); if (boss.health <= 0) { boss.defeated = true; floatTexts.push({ x: boss.x + boss.width / 2, y: boss.y, text: "LICENZIATO!", color: '#000000', borderColor: '#fbbf24', life: 80, big: true }); if (bosses.every(b => b.defeated)) { playerFrozen = true; showDonationScreen = true; donationStep = 0; stepTimer = 360; noAttempts = 0; if (backgroundMusic) { backgroundMusic.pause(); } animatedCoins = 0; animatedFired = 0; animatedStrikers = 0; buttonYesRect = { x: canvas.width / 2 - 170, y: canvas.height / 2 + 80, w: 150, h: 60 }; buttonNoRect = { x: canvas.width / 2 + 20, y: canvas.height / 2 + 80, w: 150, h: 60 }; } } } const direction = (player.x + player.width / 2) < (boss.x + boss.width / 2) ? -1 : 1; player.vx = direction * 15; player.vy = -10; } }
+          if (player.powerUpTimer > 0) { if (boss.invulnTimer > 0) boss.invulnTimer--; if (player.x < boss.x + boss.width && player.x + player.width > boss.x && player.y < boss.y + boss.height && player.y + player.height > boss.y) { if (boss.invulnTimer === 0) { boss.health--; boss.invulnTimer = 120; playSound('bonk'); createSparkles(boss.x + boss.width / 2, boss.y + boss.height / 2, '#fca5a5');
+          if (boss.health <= 0) { 
+                boss.defeated = true; 
+                floatTexts.push({ x: boss.x + boss.width / 2, y: boss.y, text: "LICENZIATO!", color: '#000000', borderColor: '#fbbf24', life: 80, big: true }); 
+                
+                // Se tutti i boss sono sconfitti...
+                if (bosses.every(b => b.defeated)) { 
+                    playerFrozen = true; 
+                    // Invece di mostrare subito la schermata, avvia il timer di 3 secondi (180 frame)
+                    bossOutroTimer = 180; 
+                    playSound('win');
+                    floatTexts.push({ x: canvas.width/2 + cameraX, y: canvas.height/2, text: "VITTORIA!", color: '#ef4444', borderColor: '#fff', life: 180, big: true });
+                } 
+            }
+          }
+          const direction = (player.x + player.width / 2) < (boss.x + boss.width / 2) ? -1 : 1; player.vx = direction * 15; player.vy = -10; } }
         });
         for (let i = bossProjectiles.length - 1; i >= 0; i--) { const proj = bossProjectiles[i]; proj.x += proj.vx; if (proj.type === 'bandiera') { proj.vy += proj.gravity; proj.y += proj.vy; if (proj.y > 500 && proj.bounces > 0) { proj.vy *= -0.6; proj.bounces--; playSound('bonk'); } if (proj.y > 600 || proj.x < -100 || proj.x > platforms[0].w + 100) { bossProjectiles.splice(i, 1); continue; } } else if (proj.type === 'parola') { if (proj.x < -100 || proj.x > platforms[0].w + 100) { bossProjectiles.splice(i, 1); continue; } } if (Math.hypot(player.x + player.width / 2 - proj.x, player.y + player.height / 2 - proj.y) < 40) { playerHit(null); bossProjectiles.splice(i, 1); } }
       }
@@ -1045,7 +1134,14 @@
       const playerAbsoluteX = (level === 6) ? (player.x + cameraX) : player.x;
       if (goal && player.x > goal.x - 40 && player.x < goal.x + 80 && !goal.reached) {
         goal.reached = true; playerFrozen = true; playSound('win');
-        const fadeOut = setInterval(() => { 
+        
+        // MODIFICA: Zittisce tutti i "Sindaco di..." immediatamente
+        Object.values(voiceMap).forEach(audio => {
+            audio.pause();
+            audio.currentTime = 0;
+        });
+
+        const fadeOut = setInterval(() => {  
             playerOpacity -= 0.05; 
             if (playerOpacity <= 0) { 
                 clearInterval(fadeOut); 
