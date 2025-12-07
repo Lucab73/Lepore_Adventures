@@ -303,7 +303,9 @@
         menuContainer.style.display = 'flex'; 
         setTimeout(function() { overlay.style.display = 'none'; }, 500);
     }
-
+    
+    const imgMeloni = new Image();
+    imgMeloni.src = 'meloni_poster.png';
     const imgFront = new Image();
     const imgSide = new Image();
     const imgBossBackground = new Image();
@@ -948,7 +950,53 @@ function drawEverything() {
       // Mano che regge l'urna
       ctx.fillStyle = '#fca5a5'; 
       ctx.beginPath(); ctx.arc(15, -25, 6, 0, Math.PI*2); ctx.fill(); 
+ 
+      // --- INDICATORE PUNTO DEBOLE ---
+      if (e.health >= 2) { 
+          const time = Date.now() / 200;
+          const bounce = Math.sin(time) * 5; 
+          
+          ctx.save();
+          ctx.translate(0, -90 + bounce); 
+          
+          // --- FIX SCRITTA SPECCHIATA ---
+          // Se il nemico sta guardando a sinistra (facing < 0), tutto il contesto è specchiato.
+          // Specchiamo di nuovo (-1) per annullare l'effetto sulla scritta.
+          if (e.facing < 0) {
+              ctx.scale(-1, 1);
+          }
+          // ------------------------------
+          
+          // 1. Disegno Freccia Rossa
+          ctx.fillStyle = '#ef4444'; 
+          ctx.strokeStyle = '#ffffff'; 
+          ctx.lineWidth = 2;
+          
+          ctx.beginPath();
+          ctx.moveTo(0, 0);       
+          ctx.lineTo(-10, -15);   
+          ctx.lineTo(-4, -15);    
+          ctx.lineTo(-4, -30);    
+          ctx.lineTo(4, -30);     
+          ctx.lineTo(4, -15);     
+          ctx.lineTo(10, -15);    
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
 
+          // 2. Scritta "SALTA!"
+          if (Math.floor(Date.now() / 500) % 2 === 0) {
+              ctx.fillStyle = '#fbbf24'; 
+              ctx.font = '900 14px Arial';
+              ctx.textAlign = 'center';
+              ctx.shadowColor = 'black';
+              ctx.shadowBlur = 4;
+              ctx.fillText("SALTA!", 0, -35);
+              ctx.shadowBlur = 0;
+          }
+          
+          ctx.restore();
+      } 
       ctx.globalAlpha = 1.0;
     }
 
@@ -1093,6 +1141,84 @@ function drawEverything() {
               ctx.fillText(text, sx - offset, textY);
               ctx.fillText(text, sx - offset + textWidth, textY); 
               ctx.restore();
+              // --- 2. CARTELLONE SATIRICO (VERSIONE BIG) ---
+              // Dimensioni aumentate per sfruttare lo spazio senza scritta
+              const posterW = 140; 
+              const posterH = 140; 
+              const posterX = sx + (pl.w / 2) - (posterW / 2); 
+              const posterY = pl.y + pl.h + 10; // Appeso 10px sotto
+
+              // Sfondo Blu Scuro (Cornice del poster)
+              ctx.fillStyle = '#1e3a8a'; 
+              ctx.fillRect(posterX - 4, posterY - 4, posterW + 8, posterH + 8);
+              ctx.strokeStyle = '#fff'; ctx.lineWidth = 3;
+              ctx.strokeRect(posterX - 4, posterY - 4, posterW + 8, posterH + 8);
+              
+              // Corde che tengono il poster (dettaglio estetico)
+              ctx.strokeStyle = '#333'; ctx.lineWidth = 1;
+              ctx.beginPath(); ctx.moveTo(posterX, posterY); ctx.lineTo(sx + pl.w/2 - 40, pl.y + pl.h); ctx.stroke();
+              ctx.beginPath(); ctx.moveTo(posterX + posterW, posterY); ctx.lineTo(sx + pl.w/2 + 40, pl.y + pl.h); ctx.stroke();
+
+              // Disegno Immagine Meloni
+              // Assicurati di aver caricato l'immagine come: const imgMeloni = new Image(); imgMeloni.src = 'meloni_poster.png';
+              if (imgMeloni.complete) {
+                  ctx.drawImage(imgMeloni, posterX, posterY, posterW, posterH);
+
+                  // --- SCRITTA "MELONI" IN ALTO ---
+                  // La posizioniamo sopra la testa, sfruttando lo spazio vuoto
+                  ctx.save();
+                  ctx.fillStyle = '#fbbf24'; // Giallo FdI
+                  ctx.font = '900 24px Arial'; // Molto grande e grassetto
+                  ctx.textAlign = 'center';
+                  ctx.shadowColor = 'black'; // Ombra per staccare dal blu
+                  ctx.shadowBlur = 4;
+                  // Posizione Y: posterY + 30 px (in alto nel poster)
+                  ctx.fillText("GIORGIA", posterX + posterW / 2, posterY + 20);
+                  ctx.restore();
+                  
+                  // --- OCCHI CHE SEGUONO IL PLAYER ---
+                  const eyeRadius = 1.5; // Raggio movimento ridotto
+                  
+                  // Coordinate calibrate sulla tua NUOVA immagine (occhi più in alto a causa delle mani)
+                  const eyes = [
+                      { rx: 0.46, ry: 0.34 }, // Occhio Sinistro
+                      { rx: 0.55, ry: 0.34 }  // Occhio Destro
+                  ];
+
+                  // Calcolo posizione Player rispetto allo schermo
+                  // (Importante: usiamo player.x - cameraX per avere la coordinata a schermo corretta)
+                  const pX = player.x - cameraX + player.width / 2;
+                  const pY = player.y + player.height / 2;
+
+                  eyes.forEach(eye => {
+                      // Centro dell'occhio sul canvas
+                      const eyeCenterX = posterX + (posterW * eye.rx);
+                      const eyeCenterY = posterY + (posterH * eye.ry);
+
+                      // Disegna Sclera (Bianco)
+                      ctx.fillStyle = '#fff'; 
+                      ctx.beginPath(); ctx.arc(eyeCenterX, eyeCenterY, 3.5, 0, Math.PI * 2); ctx.fill();
+                      // Ombra interna orbita (opzionale, dà profondità)
+                      ctx.strokeStyle = 'rgba(0,0,0,0.2)'; ctx.lineWidth=1; ctx.stroke();
+
+                      // Calcolo Angolo
+                      const deltaX = pX - eyeCenterX;
+                      const deltaY = pY - eyeCenterY;
+                      const angle = Math.atan2(deltaY, deltaX);
+
+                      // Posizione Pupilla
+                      const pupilX = eyeCenterX + Math.cos(angle) * eyeRadius;
+                      const pupilY = eyeCenterY + Math.sin(angle) * eyeRadius;
+
+                      // Disegna Pupilla Nera
+                      ctx.fillStyle = '#000'; 
+                      ctx.beginPath(); ctx.arc(pupilX, pupilY, 1.5, 0, Math.PI * 2); ctx.fill();
+                      
+                      // Riflesso Luce (Piccolo punto bianco per renderlo vivo)
+                      ctx.fillStyle = '#fff';
+                      ctx.beginPath(); ctx.arc(pupilX - 0.8, pupilY - 0.8, 1, 0, Math.PI * 2); ctx.fill();
+                  });
+              } 
 
               return; 
           }
