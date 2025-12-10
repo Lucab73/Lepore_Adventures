@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Città 30 - MOBILE PERFECT</title>
+  <title>Lepore Adventures</title>
   <style>
     /* --- STILE GENERALE --- */
     body {
@@ -246,12 +246,12 @@
     <div class="level-selector-container">
       <label for="levelSelect" style="color: #fbbf24; font-weight: bold; margin-right: 10px; font-size: 16px;">Livello:</label>
       <select id="levelSelect" style="padding: 5px; border-radius: 10px; background: #fff; border: 2px solid #d97706; font-weight: bold; cursor: pointer; color: #78350f; font-size: 16px;">
-        <option value="1">1 - Borgo Panigale</option>
+        <option value="1">1 - Porto Saragozza</option>
         <option value="2">2 - Santo Stefano</option>
-        <option value="3">3 - Savena (Crolli)</option>
+        <option value="3">3 - Savena (Zona Sismica)</option>
         <option value="4">4 - Navile (Notte)</option>
-        <option value="5">5 - Porto (Cantieri)</option>
-        <option value="6">6 - San Donato (Runner)</option>
+        <option value="5">5 - Borgo Panigale - Reno (Cantieri)</option>
+        <option value="6">6 - San Donato - San Vitale (Runner)</option>
         <option value="7">7 - BOSS FINALE</option>
       </select>
     </div>
@@ -418,11 +418,11 @@
     const player = { x: 100, y: 300, vx: 0, vy: 0, width: 50, height: 90, onGround: false, facing: 1, walkFrame: 0, walkTimer: 0, powerUpTimer: 0 };
 
     const quartieri = [
-      { nome: 'Borgo Panigale - Reno', colors: ['#C25A47', '#E8C360', '#D98D62', '#eab308'], enemyColors: { top: '#065f46', bot: '#022c22' } },
+      { nome: 'Porto - Saragozza', colors: ['#C25A47', '#E8C360', '#D98D62', '#eab308'], enemyColors: { top: '#065f46', bot: '#022c22' } },
       { nome: 'Santo Stefano', colors: ['#8B4513', '#D2691E', '#CD853F', '#F4A460'], enemyColors: { top: '#2563eb', bot: '#1e3a8a' } },
       { nome: 'Savena (Zona Sismica)', colors: ['#4682B4', '#5F9EA0', '#87CEEB', '#B0C4DE'], enemyColors: { top: '#dc2626', bot: '#7f1d1d' } },
       { nome: 'Navile (Notte)', colors: ['#1e1b4b', '#312e81', '#4338ca', '#3730a3'], enemyColors: { top: '#facc15', bot: '#a16207' } },
-      { nome: 'Porto - Saragozza (Cantieri)', colors: ['#78716c', '#a8a29e', '#d6d3d1', '#e7e5e4'], enemyColors: { top: '#9333ea', bot: '#581c87' } },
+      { nome: 'Borgo Panigale - Reno (Cantieri)', colors: ['#78716c', '#a8a29e', '#d6d3d1', '#e7e5e4'], enemyColors: { top: '#9333ea', bot: '#581c87' } },
       { nome: 'San Donato - San Vitale (La Fuga)', colors: ['#b91c1c', '#dc2626', '#ef4444', '#f87171'], enemyColors: { top: '#16a34a', bot: '#14532d' } }
     ];
 
@@ -1800,4 +1800,5 @@ function drawEverything() {
     };
     mouseBind('btnLeft', 'left'); mouseBind('btnRight', 'right'); mouseBind('btnJump', 'jump');
   </script>
+
 </body>
