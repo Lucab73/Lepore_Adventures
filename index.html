@@ -1309,7 +1309,26 @@
       floatTexts.push({ x: player.x + player.width / 2, y: player.y - 40, text: hitText, color: hitColor, borderColor: hitBorder, life: 100, big: true });
     } 
     let lastTime = 0; const fps = 60; const interval = 1000/fps; 
-    function gameLoopFn() { if (!isGameRunning) return; update(); drawEverything(); if (isGameRunning) gameLoop = requestAnimationFrame(gameLoopFn); }
+    function gameLoopFn(timestamp) {
+  if (!isGameRunning) return;
+
+  // Se è la prima esecuzione o timestamp non è definito, usiamo il tempo corrente
+  if (!timestamp) timestamp = performance.now();
+  
+  // Calcola quanto tempo è passato dall'ultimo frame
+  const deltaTime = timestamp - lastTime;
+
+  // Aggiorna il gioco solo se è passato abbastanza tempo (16.6ms per 60fps)
+  if (deltaTime >= interval) {
+    // Imposta il tempo dell'ultimo frame, sottraendo l'eccesso per mantenere il ritmo costante
+    lastTime = timestamp - (deltaTime % interval);
+    
+    update();
+    drawEverything();
+  }
+
+  if (isGameRunning) gameLoop = requestAnimationFrame(gameLoopFn);
+}
 
     function startGame() {
       var audio = document.getElementById("introMusic"); if(audio) audio.pause();
