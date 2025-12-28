@@ -1838,8 +1838,29 @@ function generateLevel(lvl) {
       floatTexts.push({ x: player.x + player.width / 2, y: player.y - 40, text: hitText, color: hitColor, borderColor: hitBorder, life: 100, big: true });
     } 
 
-    let lastTime = 0; const fps = 60; const interval = 1000/fps; 
-    function gameLoopFn() { if (!isGameRunning) return; update(); drawEverything(); if (isGameRunning) gameLoop = requestAnimationFrame(gameLoopFn); }
+   // --- LIMITATORE A 60 FPS ---
+    let lastTime = Date.now();
+    const fps = 60;
+    const interval = 1000 / fps;
+
+    function gameLoopFn() {
+      if (!isGameRunning) return;
+
+      // Richiede subito il prossimo frame al browser
+      gameLoop = requestAnimationFrame(gameLoopFn);
+
+      const now = Date.now();
+      const delta = now - lastTime;
+
+      // Esegue update e draw SOLO se sono passati almeno 16.6ms (1/60 di secondo)
+      if (delta > interval) {
+        // Aggiusta lastTime sottraendo il delta in eccesso per mantenere il ritmo costante
+        lastTime = now - (delta % interval);
+        
+        update();
+        drawEverything();
+      }
+    }
 
     function startGame() {
       var audio = document.getElementById("introMusic");
