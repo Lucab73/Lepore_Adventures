@@ -1360,16 +1360,16 @@ function generateLevel(lvl) {
       if (showingQuartiere) { ctx.fillStyle = 'rgba(0, 0, 0, 0.85)'; ctx.fillRect(0, 0, canvas.width, canvas.height); const currentQuartiere = quartieri[Math.min(level - 1, 6)]; ctx.fillStyle = '#fff'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 4; ctx.font = 'bold 48px serif'; ctx.textAlign = 'center'; ctx.strokeText('QUARTIERE:', canvas.width / 2, canvas.height / 2 - 40); ctx.fillText('QUARTIERE:', canvas.width / 2, canvas.height / 2 - 40); ctx.font = 'bold 56px serif'; ctx.strokeText(currentQuartiere.nome, canvas.width / 2, canvas.height / 2 + 30); ctx.fillText(currentQuartiere.nome, canvas.width / 2, canvas.height / 2 + 30); ctx.font = 'bold 32px serif'; ctx.fillStyle = '#fbbf24'; ctx.fillText(`Livello ${level}`, canvas.width / 2, canvas.height / 2 + 80); }
       if (isBossLevel && bossIntroTimer > 0) { ctx.fillStyle = 'rgba(0, 0, 0, 0.7)'; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = '#fff'; ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 5; ctx.font = 'bold 56px serif'; ctx.textAlign = 'center'; ctx.strokeText('LIVELLO BONUS', canvas.width / 2, canvas.height / 2 - 40); ctx.fillText('LIVELLO BONUS', canvas.width / 2, canvas.height / 2 - 40); ctx.strokeStyle = '#fbbf24'; ctx.font = 'bold 48px serif'; ctx.strokeText('SCONTRO FINALE!', canvas.width / 2, canvas.height / 2 + 30); ctx.fillText('SCONTRO FINALE!', canvas.width / 2, canvas.height / 2 + 30); }
       if (player.powerUpTimer > 0) {
-          const barW = 150; 
-          const barH = 15;
+          const barW = 120; 
+          const barH = 14;
           // Posizione in alto al centro, sotto le statistiche
-          const barX = canvas.width / 2 - barW / 2; 
-          const barY = 60; 
+          const barX = (canvas.width / 2) + 220; 
+          const barY = 15; 
           
           // Sfondo grigio scuro
-          ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
           ctx.fillRect(barX, barY, barW, barH);
-          ctx.strokeStyle = '#fff'; 
+          ctx.strokeStyle = '#fbbf24'; 
           ctx.lineWidth = 2;
           ctx.strokeRect(barX, barY, barW, barH);
           
@@ -1379,11 +1379,11 @@ function generateLevel(lvl) {
           ctx.fillRect(barX + 2, barY + 2, (barW - 4) * pct, barH - 4);
           
           // Icona e Testo
-          ctx.font = 'bold 16px Arial'; 
+          ctx.font = 'bold 14px Arial'; 
           ctx.textAlign = 'right';
-          ctx.fillStyle = '#fff';
-          const label = (level === 7) ? "☔ OMBRELLO" : "⛔ 30 KM/H";
-          ctx.fillText(label, barX - 10, barY + 13);
+          ctx.fillStyle = '#fbbf24';
+          const label = (level === 7) ? "☔" : "⛔";
+          ctx.fillText(label, barX - 5, barY + 12);
       } 
  }
 
