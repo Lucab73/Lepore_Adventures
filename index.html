@@ -1740,17 +1740,15 @@ coinList.push({
         if (e.isFired) return;
         if (player.x < e.x + e.width && player.x + player.width > e.x && player.y < e.y + e.height && player.y + player.height > e.y) {
             // --- LOGICA COLLISIONE TOPO (NUOVO) ---
-            if (e.type === 'rat') {
-                // Se il player ha l'ombrello (powerup) E sta saltando/cadendo sopra (non nuotando dentro)
-                const isJumpAttack = player.vy > 0 && player.y + player.height < e.y + e.height + 10;
-                
-                if (player.powerUpTimer > 0 && isJumpAttack) {
+           if (e.type === 'rat') {
+                // MODIFICA: Se hai l'ombrello, il topo muore al contatto (rimosso isJumpAttack)
+                if (player.powerUpTimer > 0) {
                     // Topo Eliminato
-                    e.isFired = true; // Lo marchiamo come fired per rimuoverlo (o splice diretto)
+                    e.isFired = true; 
                     playSound('bonk');
                     createSparkles(e.x + e.width/2, e.y, '#8b4513');
                     floatTexts.push({ x: e.x, y: e.y - 40, text: "TOPO ELIMINATO!", color: '#a0522d', borderColor: '#fff', life: 60, big: false });
-                    enemies.splice(index, 1); // Rimozione immediata array
+                    enemies.splice(index, 1); 
                 } else {
                     // Morte Player
                     playerHit(null); 
