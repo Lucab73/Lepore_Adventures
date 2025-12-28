@@ -1863,20 +1863,119 @@ function generateLevel(lvl) {
     }
 
     function startGame() {
+      // 1. FERMA EVENTUALI LOOP PRECEDENTI (RISOLVE IL PROBLEMA VELOCITÀ)
+      if (gameLoop) cancelAnimationFrame(gameLoop);
+      lastTime = Date.now(); // Resetta il timer dei frame
+
       var audio = document.getElementById("introMusic");
       if(audio) audio.pause();
-      isGameRunning = true; initAudio(); document.body.classList.add('game-active');
-      const selectedLevel = parseInt(document.getElementById('levelSelect').value); level = selectedLevel; document.getElementById('level').textContent = level;
-      lives = 40000; targetLives = 40000; document.getElementById('lives').textContent = lives.toLocaleString('it-IT');
-      playMusicForLevel(level); resetPlayerPos(); player.onGround = false; player.facing = 1; player.walkFrame = 0; player.walkTimer = 0; player.powerUpTimer = 0;
-      if (level === 8) { coins = 500; document.getElementById('coins').textContent = coins; }
-      document.getElementById('mainMenuContainer').style.display = 'none'; document.getElementById('gameArea').style.display = 'flex';
-      canvas = document.getElementById('gameCanvas'); ctx = canvas.getContext('2d');
-      canvas.addEventListener('mousemove', (e) => { if (!showDonationScreen || donationStep !== 1) return; const rect = canvas.getBoundingClientRect(); const mouseX = e.clientX - rect.left; const mouseY = e.clientY - rect.top; if (mouseX >= buttonYesRect.x && mouseX <= buttonYesRect.x + buttonYesRect.w && mouseY >= buttonYesRect.y && mouseY <= buttonYesRect.y + buttonYesRect.h) { playSound('bonk'); noAttempts++; const positionLeft = canvas.width / 2 - 170; const positionRight = buttonNoRect.x + buttonNoRect.w + 30; if (buttonYesRect.x === positionLeft) buttonYesRect.x = positionRight; else buttonYesRect.x = positionLeft; buttonYesRect.y = buttonNoRect.y; } });
-      canvas.addEventListener('click', (e) => { const rect = canvas.getBoundingClientRect(); const clickX = e.clientX - rect.left; const clickY = e.clientY - rect.top; if (showGameOver) { if (clickX >= gameOverButtonPlay.x && clickX <= gameOverButtonPlay.x + gameOverButtonPlay.w && clickY >= gameOverButtonPlay.y && clickY <= gameOverButtonPlay.y + gameOverButtonPlay.h) { playSound('coin'); const goAudio = document.getElementById("gameOverMusic"); if(goAudio) { goAudio.pause(); goAudio.currentTime = 0; } const introMusic = document.getElementById("introMusic"); if (introMusic) { introMusic.pause(); introMusic.currentTime = 0; } const selectedLevel = parseInt(document.getElementById('levelSelect').value); level = selectedLevel; document.getElementById('level').textContent = level; showGameOver = false; lives = 40000; targetLives = 40000; coins = 0; playerFrozen = false; document.getElementById('lives').textContent = lives.toLocaleString('it-IT'); document.getElementById('coins').textContent = 0; if (level === 8) { coins = 500; document.getElementById('coins').textContent = coins; } playMusicForLevel(level); generateLevel(level); } if (clickX >= gameOverButtonMenu.x && clickX <= gameOverButtonMenu.x + gameOverButtonMenu.w && clickY >= gameOverButtonMenu.y && clickY <= gameOverButtonMenu.y + gameOverButtonMenu.h) { location.reload(); } return; } if (!showDonationScreen || donationStep !== 1) return; if (clickX >= buttonNoRect.x && clickX <= buttonNoRect.x + buttonNoRect.w && clickY >= buttonNoRect.y && clickY <= buttonNoRect.y + buttonNoRect.h) { playSound('die'); donationStep = 2; stepTimer = 240; } if (clickX >= buttonYesRect.x && clickX <= buttonYesRect.x + buttonYesRect.w && clickY >= buttonYesRect.y && clickY <= buttonYesRect.y + buttonYesRect.h) { playSound('bonk'); } });
-      generateLevel(level); gameLoopFn();
-    }
+      
+      isGameRunning = true; 
+      initAudio(); 
+      document.body.classList.add('game-active');
+      
+      const selectedLevel = parseInt(document.getElementById('levelSelect').value); 
+      level = selectedLevel; 
+      document.getElementById('level').textContent = level;
+      
+      lives = 40000; 
+      targetLives = 40000; 
+      document.getElementById('lives').textContent = lives.toLocaleString('it-IT');
+      
+      playMusicForLevel(level); 
+      resetPlayerPos(); 
+      player.onGround = false; 
+      player.facing = 1; 
+      player.walkFrame = 0; 
+      player.walkTimer = 0; 
+      player.powerUpTimer = 0;
+      
+      if (level === 7) { coins = 500; document.getElementById('coins').textContent = coins; }
+      else { coins = 0; document.getElementById('coins').textContent = 0; } // Reset monete per livelli normali
 
+      document.getElementById('mainMenuContainer').style.display = 'none'; 
+      document.getElementById('gameArea').style.display = 'flex';
+      
+      canvas = document.getElementById('gameCanvas'); 
+      ctx = canvas.getContext('2d');
+
+      // --- NUOVA GESTIONE CLIC/TOUCH CON SCALING ---
+      // Rimuoviamo vecchi listener per evitare duplicati (opzionale ma pulito)
+      const newCanvas = canvas.cloneNode(true);
+      canvas.parentNode.replaceChild(newCanvas, canvas);
+      canvas = newCanvas;
+      ctx = canvas.getContext('2d');
+
+      // Gestione Movimento Mouse (Donation Screen)
+      canvas.addEventListener('mousemove', (e) => { 
+          if (!showDonationScreen || donationStep !== 1) return; 
+          const pos = getEventPos(canvas, e); // Uso la funzione di scaling
+          
+          if (pos.x >= buttonYesRect.x && pos.x <= buttonYesRect.x + buttonYesRect.w && 
+              pos.y >= buttonYesRect.y && pos.y <= buttonYesRect.y + buttonYesRect.h) { 
+              playSound('bonk'); 
+              noAttempts++; 
+              const positionLeft = canvas.width / 2 - 170; 
+              const positionRight = buttonNoRect.x + buttonNoRect.w + 30; 
+              if (buttonYesRect.x === positionLeft) buttonYesRect.x = positionRight; 
+              else buttonYesRect.x = positionLeft; 
+              buttonYesRect.y = buttonNoRect.y; 
+          } 
+      });
+
+      // Gestione Click (Game Over e Menu)
+      canvas.addEventListener('click', (e) => { 
+          const pos = getEventPos(canvas, e); // Uso la funzione di scaling
+
+          if (showGameOver) { 
+              // Tasto RIGIOCA
+              if (pos.x >= gameOverButtonPlay.x && pos.x <= gameOverButtonPlay.x + gameOverButtonPlay.w && 
+                  pos.y >= gameOverButtonPlay.y && pos.y <= gameOverButtonPlay.y + gameOverButtonPlay.h) { 
+                  playSound('coin'); 
+                  const goAudio = document.getElementById("gameOverMusic"); 
+                  if(goAudio) { goAudio.pause(); goAudio.currentTime = 0; } 
+                  const introMusic = document.getElementById("introMusic"); 
+                  if (introMusic) { introMusic.pause(); introMusic.currentTime = 0; } 
+                  
+                  showGameOver = false; 
+                  playerFrozen = false; 
+                  // Riavvia lo stesso livello
+                  startGame(); 
+                  return;
+              } 
+              // Tasto MENU
+              if (pos.x >= gameOverButtonMenu.x && pos.x <= gameOverButtonMenu.x + gameOverButtonMenu.w && 
+                  pos.y >= gameOverButtonMenu.y && pos.y <= gameOverButtonMenu.y + gameOverButtonMenu.h) { 
+                  location.reload(); 
+              } 
+              return; 
+          } 
+
+          if (!showDonationScreen || donationStep !== 1) return; 
+          
+          if (pos.x >= buttonNoRect.x && pos.x <= buttonNoRect.x + buttonNoRect.w && 
+              pos.y >= buttonNoRect.y && pos.y <= buttonNoRect.y + buttonNoRect.h) { 
+              playSound('die'); donationStep = 2; stepTimer = 240; 
+          } 
+          if (pos.x >= buttonYesRect.x && pos.x <= buttonYesRect.x + buttonYesRect.w && 
+              pos.y >= buttonYesRect.y && pos.y <= buttonYesRect.y + buttonYesRect.h) { 
+              playSound('bonk'); 
+          } 
+      });
+
+      generateLevel(level); 
+      gameLoopFn(); // Avvia il loop
+    }
+// --- FUNZIONE PER CALCOLARE IL TOCCO SU SCHERMI DI DIVERSA GRANDEZZA ---
+    function getEventPos(canvas, evt) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;   // Rapporto larghezza
+        const scaleY = canvas.height / rect.height; // Rapporto altezza
+        return {
+            x: (evt.clientX - rect.left) * scaleX,
+            y: (evt.clientY - rect.top) * scaleY
+        };
+    }
     window.addEventListener('keydown', e => { if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = true; if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = true; if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') { keys.jump = true; e.preventDefault(); } });
     window.addEventListener('keyup', e => { if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = false; if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = false; if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') keys.jump = false; });
   
