@@ -170,6 +170,9 @@
     #voteStat.critical { animation: pulseRed 0.5s infinite; color: #fca5a5; }
     #voteStat.falling { animation: shake 0.1s infinite; }
 
+    #powerStat {
+      display: none !important; /* <--- FONDAMENTALE: Nasconde l'intero blocco (icona compresa) */
+    }
     #powerBarContainer { width: 80px; height: 10px; background: #444; border: 2px solid #fff; border-radius: 8px; overflow: hidden; display: none !important; }
     #powerBar { width: 100%; height: 100%; background: #ef4444; transition: width 0.1s linear; }
 
@@ -1417,7 +1420,7 @@ function generateLevel(lvl) {
           const barH = 14;
           // Posizione in alto al centro, sotto le statistiche
           const barX = (canvas.width / 2) + 230; 
-          const barY = 45; 
+          const barY = 28; 
           
           // Sfondo grigio scuro
           ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
@@ -1489,8 +1492,9 @@ function generateLevel(lvl) {
       return false;
     }
 
-   function updatePowerUpTimer() {
-      // Semplice calcolo: nessun comando grafico qui!
+  function updatePowerUpTimer() {
+      // SOLO MATEMATICA: Nessun comando grafico qui!
+      // Questo impedisce al vecchio menu HTML di riapparire e spostare tutto.
       if (player.powerUpTimer > 0) { 
           player.powerUpTimer--; 
       }
