@@ -665,7 +665,7 @@ function generateLevel(lvl) {
           
           if (canSpawnEnemy) { 
              if (lvl === 7 && Math.random() > 0.7) { 
-                 enemies.push({ x: centerX, y: py - 85, width: 50, height: 85, vx: 1.5, originalVx: 1.5, facing: 1, type: 'alluvionato', platformX: platform.x, platformW: pw, state: 'patrol', health: 1, timer: 0, attackTimer: 60 + Math.random()*60 });
+                enemies.push({ x: centerX, y: py - 70, width: 50, height: 70, vx: 1.5, originalVx: 1.5, facing: 1, type: 'alluvionato', platformX: platform.x, platformW: pw, state: 'patrol', health: 1, timer: 0, attackTimer: 60 + Math.random()*60 });
              } else if (lvl !== 7) {
                  let speed = (lvl >= 4) ? 4 + lvl * 0.2 : 2 + lvl * 0.5; if (lvl === 5 && platType === 'moving') speed = speed * 0.4;
                  let parentRef = (platType === 'falling' || platType === 'moving') ? platform : null;
@@ -674,7 +674,25 @@ function generateLevel(lvl) {
              }
           }
         }
+        if (powerupsSpawned === 0 && platforms.length > 5) {
+          // Prendo una piattaforma verso la metà del livello
+          const targetIndex = Math.floor(platforms.length / 2);
+          const targetPlat = platforms[targetIndex];
+          
+          // Calcolo coordinate sicure (sopra la piattaforma)
+          // Se è livello 7 (Ravone) serve l'ombrello, altrimenti il cartello (default)
+          const pType = (lvl === 7) ? 'umbrella' : 'sign'; 
+          
+          // Se la piattaforma è di tipo "falling", mettiamolo un po' più in alto per sicurezza
+          const yOffset = (targetPlat.type === 'falling') ? 80 : 60;
 
+          powerups.push({ 
+              x: targetPlat.x + targetPlat.w / 2, 
+              y: targetPlat.y - yOffset, 
+              collected: false,
+              type: pType
+          });
+        }
         if (lvl >= 2 && lvl !== 7) { 
             const strikerCount = Math.min(4 + lvl, Math.max(1, Math.floor(enemies.length * (0.2 + lvl * 0.05)))); 
             let createdStrikers = 0; let attempts = 0;
@@ -1182,29 +1200,64 @@ function generateLevel(lvl) {
       enemies.forEach(e => {
         if (e.isFired) return;
         if (e.type === 'rat') return;
-        const sx = e.x - cameraX; if (sx < -e.width || sx > canvas.width) return; ctx.save(); ctx.translate(sx + e.width / 2, e.y + e.height / 2);
+        
+        const sx = e.x - cameraX; 
+        if (sx < -e.width || sx > canvas.width) return; 
+        
+        ctx.save(); 
+        ctx.translate(sx + e.width / 2, e.y + e.height / 2);
+        
+        // Disegno fumetto testo
         if (e.state === 'talking' && e.currentPhrase) { 
             let balloonY = -77; let rectY = -100; if (e.type === 'fdi') { balloonY = -127; rectY = -150; }
-            ctx.font = 'bold 16px Arial'; ctx.fillStyle = 'white'; ctx.strokeStyle = 'black'; ctx.lineWidth = 2; const w = ctx.measureText(e.currentPhrase).width + 30; ctx.beginPath(); ctx.roundRect(-w / 2, rectY, w, 40, 8); ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.moveTo(0, rectY + 40); ctx.lineTo(-8, rectY + 50); ctx.lineTo(8, rectY + 40); ctx.fill(); ctx.stroke(); ctx.fillStyle = 'black'; ctx.textAlign = 'center'; ctx.fillText(e.currentPhrase, 0, balloonY); 
+            ctx.font = 'bold 16px Arial'; ctx.fillStyle = 'white'; ctx.strokeStyle = 'black'; ctx.lineWidth = 2; 
+            const w = ctx.measureText(e.currentPhrase).width + 30; 
+            ctx.beginPath(); ctx.roundRect(-w / 2, rectY, w, 40, 8); ctx.fill(); ctx.stroke(); 
+            ctx.beginPath(); ctx.moveTo(0, rectY + 40); ctx.lineTo(-8, rectY + 50); ctx.lineTo(8, rectY + 40); ctx.fill(); ctx.stroke(); 
+            ctx.fillStyle = 'black'; ctx.textAlign = 'center'; ctx.fillText(e.currentPhrase, 0, balloonY); 
         }
+
         if (e.facing < 0) ctx.scale(-1, 1);
-        if (e.type === 'fdi') { drawFDIEnemy(ctx, e); }
-        else if (e.type === 'striker') { drawStriker(ctx, e); }
+
+        if (e.type === 'fdi') { 
+            drawFDIEnemy(ctx, e); 
+        }
+        else if (e.type === 'striker') { 
+            drawStriker(ctx, e); 
+        }
         else if (e.type === 'alluvionato') {
-            ctx.fillStyle = '#000000'; ctx.fillRect(-10, 25, 8, 15); ctx.fillRect(2, 25, 8, 15);
-            ctx.fillStyle = '#1e3a8a'; ctx.fillRect(-15, -20, 30, 50); ctx.strokeStyle = '#3b82f6'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0, -20); ctx.lineTo(0, 30); ctx.stroke();
-            ctx.fillStyle = '#fca5a5'; ctx.beginPath(); ctx.arc(0, -30, 14, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#1e40af'; ctx.beginPath(); ctx.arc(0, -32, 16, Math.PI, 0); ctx.lineTo(16, -20); ctx.lineTo(-16, -20); ctx.fill();
+            // Gambe
+            ctx.fillStyle = '#000000'; ctx.fillRect(-12, 20, 10, 25); ctx.fillRect(2, 20, 10, 25);
+            // Corpo
+            ctx.fillStyle = '#1e3a8a'; ctx.fillRect(-19, -20, 38, 45); 
+            // Cerniera
+            ctx.strokeStyle = '#3b82f6'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0, -20); ctx.lineTo(0, 25); ctx.stroke();
+            // Testa
+            ctx.fillStyle = '#fca5a5'; ctx.beginPath(); ctx.arc(0, -32, 18, 0, Math.PI*2); ctx.fill();
+            // Cappello
+            ctx.fillStyle = '#1e40af'; ctx.beginPath(); ctx.arc(0, -34, 20, Math.PI, 0); ctx.lineTo(20, -20); ctx.lineTo(-20, -20); ctx.fill();
+            // Boccaglio
             ctx.save();
-            ctx.translate(15, 5); ctx.rotate(Math.PI / 3); 
+            ctx.translate(18, 0); ctx.rotate(Math.PI / 3); 
             ctx.fillStyle = '#374151'; ctx.beginPath(); ctx.ellipse(0, -8, 7, 3, 0, 0, Math.PI*2); ctx.fill();
             ctx.fillStyle = '#9ca3af'; ctx.beginPath(); ctx.moveTo(-7, -8); ctx.lineTo(-5, 8); ctx.lineTo(5, 8); ctx.lineTo(7, -8); ctx.closePath(); ctx.fill(); ctx.strokeStyle = '#4b5563'; ctx.stroke();
             ctx.beginPath(); ctx.moveTo(-7, -5); ctx.lineTo(7, -5); ctx.stroke(); ctx.beginPath(); ctx.moveTo(-6, 5); ctx.lineTo(6, 5); ctx.stroke();
             ctx.strokeStyle = '#d1d5db'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(0, -8, 8, Math.PI, 0); ctx.stroke();
             ctx.restore();
-        } else { drawStandardEnemy(ctx, e); }
-        if (e.state === 'alert') { const alertX = e.facing > 0 ? -35 : 35; ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(alertX, -70, 12, 0, Math.PI * 2); ctx.fill(); ctx.fillStyle = '#fff'; ctx.font = 'bold 18px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('!', alertX, -70); }
-        ctx.restore();
+        } 
+        else { 
+            // QUESTO MANCAVA: Disegna i nemici normali se non è nessuno dei precedenti
+            drawStandardEnemy(ctx, e); 
+        }
+
+        // Icona Allerta
+        if (e.state === 'alert') { 
+            const alertX = e.facing > 0 ? -35 : 35; 
+            ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.arc(alertX, -70, 12, 0, Math.PI * 2); ctx.fill(); 
+            ctx.fillStyle = '#fff'; ctx.font = 'bold 18px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('!', alertX, -70); 
+        }
+        
+        ctx.restore(); // QUESTO MANCAVA: Chiude il save() iniziale
       });
     }
 
@@ -1364,7 +1417,7 @@ function generateLevel(lvl) {
           const barH = 14;
           // Posizione in alto al centro, sotto le statistiche
           const barX = (canvas.width / 2) + 220; 
-          const barY = 15; 
+          const barY = 28; 
           
           // Sfondo grigio scuro
           ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
