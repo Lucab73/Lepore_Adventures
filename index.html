@@ -613,7 +613,14 @@ function generateLevel(lvl) {
                   movingProps.subType = subTypes[Math.floor(Math.random()*subTypes.length)];
                   if (movingProps.subType === 'sofa') movingProps.color = ['#b91c1c', '#1e3a8a', '#16a34a'][Math.floor(Math.random()*3)];
                   else if (movingProps.subType === 'fridge') movingProps.color = ['#74a57f', '#e5e5e5', '#fca5a5', '#93c5fd'][Math.floor(Math.random()*4)];
-                  coinList.push({ x: px + pw/2, y: py - 70, type: 'banknote', collected: false });
+                  // Sceglie casualmente tra sacco (80% di probabilità per banconota, 20% per sacco)
+const randomType = Math.random() > 0.8 ? 'moneybag' : 'banknote';
+coinList.push({ 
+    x: px + pw/2, 
+    y: py - 70, 
+    type: randomType, 
+    collected: false 
+});
 
               } else if (platType === 'tilting') {
                   pw = 140 + Math.random() * 20; 
@@ -662,12 +669,12 @@ function generateLevel(lvl) {
 
           platforms.push(platform); lastPlatform = platform; const centerX = platform.x + platform.w / 2;
 
-          if (lvl !== 7) {
-             if (platType !== 'fdi_booth' && platType !== 'floating' && platType !== 'tilting' && Math.random() > 0.3) coinList.push({ x: centerX, y: py - 40, type: Math.random() > 0.8 ? 'moneybag' : 'banknote', collected: false });
-          }
+          
+          if (platType !== 'fdi_booth' && platType !== 'floating' && platType !== 'tilting' && Math.random() > 0.3) coinList.push({ x: centerX, y: py - 40, type: Math.random() > 0.8 ? 'moneybag' : 'banknote', collected: false });
+          
           
           if (canSpawnEnemy) { 
-             if (lvl === 7 && Math.random() > 0.7) { 
+             if (lvl === 7 && Math.random() > 0.45) { 
                 enemies.push({ x: centerX, y: py - 70, width: 50, height: 70, vx: 1.5, originalVx: 1.5, facing: 1, type: 'alluvionato', platformX: platform.x, platformW: pw, state: 'patrol', health: 1, timer: 0, attackTimer: 60 + Math.random()*60 });
              } else if (lvl !== 7) {
                  let speed = (lvl >= 4) ? 4 + lvl * 0.2 : 2 + lvl * 0.5; if (lvl === 5 && platType === 'moving') speed = speed * 0.4;
@@ -1228,26 +1235,75 @@ function generateLevel(lvl) {
         else if (e.type === 'striker') { 
             drawStriker(ctx, e); 
         }
-        else if (e.type === 'alluvionato') {
-            // Gambe
-            ctx.fillStyle = '#000000'; ctx.fillRect(-12, 20, 10, 25); ctx.fillRect(2, 20, 10, 25);
-            // Corpo
-            ctx.fillStyle = '#1e3a8a'; ctx.fillRect(-19, -20, 38, 45); 
-            // Cerniera
-            ctx.strokeStyle = '#3b82f6'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0, -20); ctx.lineTo(0, 25); ctx.stroke();
-            // Testa
-            ctx.fillStyle = '#fca5a5'; ctx.beginPath(); ctx.arc(0, -32, 18, 0, Math.PI*2); ctx.fill();
-            // Cappello
-            ctx.fillStyle = '#1e40af'; ctx.beginPath(); ctx.arc(0, -34, 20, Math.PI, 0); ctx.lineTo(20, -20); ctx.lineTo(-20, -20); ctx.fill();
-            // Boccaglio
+      else if (e.type === 'alluvionato') {
+            ctx.strokeStyle = 'rgba(0,0,0,0.8)'; ctx.lineWidth = 2;
+
+            // --- STIVALI DA PIOGGIA (Neri e massicci) ---
+            ctx.fillStyle = '#171717'; 
+            ctx.fillRect(-16, 20, 14, 25); ctx.strokeRect(-16, 20, 14, 25);
+            ctx.fillRect(2, 20, 14, 25); ctx.strokeRect(2, 20, 14, 25);
+
+            // --- CORPO: IMPERMEABILE GIALLO (Largo e ingombrante) ---
+            ctx.fillStyle = '#facc15'; 
+            ctx.fillRect(-25, -20, 50, 45); ctx.strokeRect(-25, -20, 50, 45);
+            
+            // Bottoni e patta centrale
+            ctx.fillStyle = '#eab308'; ctx.fillRect(-3, -20, 6, 45);
+            ctx.fillStyle = '#000';
+            ctx.beginPath(); ctx.arc(0, -10, 2, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(0, 5, 2, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(0, 20, 2, 0, Math.PI*2); ctx.fill();
+
+            // --- CAPPUCCIO GIALLO ---
+            ctx.fillStyle = '#facc15';
+            ctx.beginPath(); 
+            ctx.arc(0, -35, 25, Math.PI, 0); 
+            ctx.lineTo(25, -20); ctx.lineTo(-25, -20); ctx.closePath();
+            ctx.fill(); ctx.stroke();
+
+            // Ombra interna cappuccio
+            ctx.fillStyle = '#ca8a04';
+            ctx.beginPath(); ctx.arc(0, -35, 18, 0, Math.PI*2); ctx.fill();
+
+            // --- FACCIA DENTRO IL CAPPUCCIO ---
+            ctx.fillStyle = '#fca5a5'; 
+            ctx.beginPath(); ctx.arc(0, -35, 15, 0, Math.PI*2); ctx.fill();
+
+            // OCCHI ARRABBIATI
+            ctx.fillStyle = '#000';
+            ctx.beginPath(); ctx.arc(-5, -38, 2.2, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(5, -38, 2.2, 0, Math.PI*2); ctx.fill();
+            // Sopracciglia
+            ctx.strokeStyle = '#000'; ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.moveTo(-9, -43); ctx.lineTo(-3, -40); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(9, -43); ctx.lineTo(3, -40); ctx.stroke();
+
+            // BOCCA (In posa da urlo)
+            ctx.fillStyle = '#451a03'; // Colore scuro per l'interno bocca
+            ctx.beginPath();
+            // Disegniamo un piccolo ovale o un arco per l'urlo
+            ctx.ellipse(0, -28, 5, 3, 0, 0, Math.PI * 2); 
+            ctx.fill();
+            // Accenno di denti o labbra
+            ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // --- IL SECCHIO INCLINATO ---
             ctx.save();
-            ctx.translate(18, 0); ctx.rotate(Math.PI / 3); 
-            ctx.fillStyle = '#374151'; ctx.beginPath(); ctx.ellipse(0, -8, 7, 3, 0, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#9ca3af'; ctx.beginPath(); ctx.moveTo(-7, -8); ctx.lineTo(-5, 8); ctx.lineTo(5, 8); ctx.lineTo(7, -8); ctx.closePath(); ctx.fill(); ctx.strokeStyle = '#4b5563'; ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(-7, -5); ctx.lineTo(7, -5); ctx.stroke(); ctx.beginPath(); ctx.moveTo(-6, 5); ctx.lineTo(6, 5); ctx.stroke();
-            ctx.strokeStyle = '#d1d5db'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(0, -8, 8, Math.PI, 0); ctx.stroke();
+            ctx.translate(22, 12); 
+            ctx.rotate(-Math.PI / 6); 
+            ctx.fillStyle = '#9ca3af'; 
+            ctx.beginPath();
+            ctx.moveTo(-12, 0); ctx.lineTo(12, 0);
+            ctx.lineTo(16, 28); ctx.lineTo(-16, 28); ctx.closePath();
+            ctx.fill(); ctx.stroke();
+            // Acqua
+            ctx.fillStyle = '#3b82f6'; ctx.fillRect(-11, 2, 22, 6);
+            // Manico
+            ctx.strokeStyle = '#4b5563'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(0, 0, 12, Math.PI, 0); ctx.stroke();
             ctx.restore();
-        } 
+        }
         else { 
             // QUESTO MANCAVA: Disegna i nemici normali se non è nessuno dei precedenti
             drawStandardEnemy(ctx, e); 
@@ -1415,12 +1471,12 @@ function generateLevel(lvl) {
       if (level === 6 && !showDonationScreen && Math.floor(Date.now() / 500) % 2 === 0) { ctx.lineWidth = 4; ctx.strokeStyle = '#ff0000'; ctx.font = '900 48px Arial'; ctx.textAlign = 'center'; ctx.strokeText("CORRI!", canvas.width - 150, 100); ctx.fillStyle = '#00ff00'; ctx.fillText("CORRI!", canvas.width - 150, 100); }
       if (showingQuartiere) { ctx.fillStyle = 'rgba(0, 0, 0, 0.85)'; ctx.fillRect(0, 0, canvas.width, canvas.height); const currentQuartiere = quartieri[Math.min(level - 1, 6)]; ctx.fillStyle = '#fff'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 4; ctx.font = 'bold 48px serif'; ctx.textAlign = 'center'; ctx.strokeText('QUARTIERE:', canvas.width / 2, canvas.height / 2 - 40); ctx.fillText('QUARTIERE:', canvas.width / 2, canvas.height / 2 - 40); ctx.font = 'bold 56px serif'; ctx.strokeText(currentQuartiere.nome, canvas.width / 2, canvas.height / 2 + 30); ctx.fillText(currentQuartiere.nome, canvas.width / 2, canvas.height / 2 + 30); ctx.font = 'bold 32px serif'; ctx.fillStyle = '#fbbf24'; ctx.fillText(`Livello ${level}`, canvas.width / 2, canvas.height / 2 + 80); }
       if (isBossLevel && bossIntroTimer > 0) { ctx.fillStyle = 'rgba(0, 0, 0, 0.7)'; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = '#fff'; ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 5; ctx.font = 'bold 56px serif'; ctx.textAlign = 'center'; ctx.strokeText('LIVELLO BONUS', canvas.width / 2, canvas.height / 2 - 40); ctx.fillText('LIVELLO BONUS', canvas.width / 2, canvas.height / 2 - 40); ctx.strokeStyle = '#fbbf24'; ctx.font = 'bold 48px serif'; ctx.strokeText('SCONTRO FINALE!', canvas.width / 2, canvas.height / 2 + 30); ctx.fillText('SCONTRO FINALE!', canvas.width / 2, canvas.height / 2 + 30); }
-      if (player.powerUpTimer > 0) {
+      if (player.powerUpTimer > 0 && level !== 8) {
           const barW = 120; 
           const barH = 14;
           // Posizione in alto al centro, sotto le statistiche
-          const barX = (canvas.width / 2) + 230; 
-          const barY = 28; 
+          const barX = (canvas.width / 2) + 250; 
+          const barY = 26; 
           
           // Sfondo grigio scuro
           ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
