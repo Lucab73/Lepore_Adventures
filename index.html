@@ -170,7 +170,7 @@
     #voteStat.critical { animation: pulseRed 0.5s infinite; color: #fca5a5; }
     #voteStat.falling { animation: shake 0.1s infinite; }
 
-    #powerBarContainer { width: 80px; height: 10px; background: #444; border: 2px solid #fff; border-radius: 8px; overflow: hidden; display: none; }
+    #powerBarContainer { width: 80px; height: 10px; background: #444; border: 2px solid #fff; border-radius: 8px; overflow: hidden; display: none !important; }
     #powerBar { width: 100%; height: 100%; background: #ef4444; transition: width 0.1s linear; }
 
     #gameCanvas {
@@ -1359,7 +1359,33 @@ function generateLevel(lvl) {
       if (level === 6 && !showDonationScreen && Math.floor(Date.now() / 500) % 2 === 0) { ctx.lineWidth = 4; ctx.strokeStyle = '#ff0000'; ctx.font = '900 48px Arial'; ctx.textAlign = 'center'; ctx.strokeText("CORRI!", canvas.width - 150, 100); ctx.fillStyle = '#00ff00'; ctx.fillText("CORRI!", canvas.width - 150, 100); }
       if (showingQuartiere) { ctx.fillStyle = 'rgba(0, 0, 0, 0.85)'; ctx.fillRect(0, 0, canvas.width, canvas.height); const currentQuartiere = quartieri[Math.min(level - 1, 6)]; ctx.fillStyle = '#fff'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 4; ctx.font = 'bold 48px serif'; ctx.textAlign = 'center'; ctx.strokeText('QUARTIERE:', canvas.width / 2, canvas.height / 2 - 40); ctx.fillText('QUARTIERE:', canvas.width / 2, canvas.height / 2 - 40); ctx.font = 'bold 56px serif'; ctx.strokeText(currentQuartiere.nome, canvas.width / 2, canvas.height / 2 + 30); ctx.fillText(currentQuartiere.nome, canvas.width / 2, canvas.height / 2 + 30); ctx.font = 'bold 32px serif'; ctx.fillStyle = '#fbbf24'; ctx.fillText(`Livello ${level}`, canvas.width / 2, canvas.height / 2 + 80); }
       if (isBossLevel && bossIntroTimer > 0) { ctx.fillStyle = 'rgba(0, 0, 0, 0.7)'; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = '#fff'; ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 5; ctx.font = 'bold 56px serif'; ctx.textAlign = 'center'; ctx.strokeText('LIVELLO BONUS', canvas.width / 2, canvas.height / 2 - 40); ctx.fillText('LIVELLO BONUS', canvas.width / 2, canvas.height / 2 - 40); ctx.strokeStyle = '#fbbf24'; ctx.font = 'bold 48px serif'; ctx.strokeText('SCONTRO FINALE!', canvas.width / 2, canvas.height / 2 + 30); ctx.fillText('SCONTRO FINALE!', canvas.width / 2, canvas.height / 2 + 30); }
-    }
+      if (player.powerUpTimer > 0) {
+          const barW = 150; 
+          const barH = 15;
+          // Posizione in alto al centro, sotto le statistiche
+          const barX = canvas.width / 2 - barW / 2; 
+          const barY = 60; 
+          
+          // Sfondo grigio scuro
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+          ctx.fillRect(barX, barY, barW, barH);
+          ctx.strokeStyle = '#fff'; 
+          ctx.lineWidth = 2;
+          ctx.strokeRect(barX, barY, barW, barH);
+          
+          // Barra Rossa che cala
+          const pct = Math.max(0, player.powerUpTimer / 600);
+          ctx.fillStyle = '#ef4444';
+          ctx.fillRect(barX + 2, barY + 2, (barW - 4) * pct, barH - 4);
+          
+          // Icona e Testo
+          ctx.font = 'bold 16px Arial'; 
+          ctx.textAlign = 'right';
+          ctx.fillStyle = '#fff';
+          const label = (level === 7) ? "☔ OMBRELLO" : "⛔ 30 KM/H";
+          ctx.fillText(label, barX - 10, barY + 13);
+      } 
+ }
 
     function drawDonationScreen() {
       canvas.style.cursor = 'pointer'; if (imgBolognaIntro.complete) ctx.drawImage(imgBolognaIntro, 0, 0, canvas.width, canvas.height); ctx.fillStyle = 'rgba(0, 0, 0, 0.85)'; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.textAlign = 'center';
@@ -1410,12 +1436,11 @@ function generateLevel(lvl) {
       return false;
     }
 
-    function updatePowerUpTimer() {
+   function updatePowerUpTimer() {
+      // Semplice calcolo: nessun comando grafico qui!
       if (player.powerUpTimer > 0) { 
-          player.powerUpTimer--; document.getElementById('powerStat').style.display = 'flex'; document.getElementById('powerBarContainer').style.display = 'block'; 
-          const pct = (player.powerUpTimer / 600) * 100; document.getElementById('powerBar').style.width = pct + '%'; 
-          document.getElementById('powerLabel').textContent = level === 7 ? "☔ OMBRELLO:" : "⛔ 30km/h:";
-      } else { document.getElementById('powerStat').style.display = 'none'; }
+          player.powerUpTimer--; 
+      }
     }
 
     function updatePlayerMovement() {
@@ -1843,7 +1868,24 @@ function generateLevel(lvl) {
     const fps = 60;
     const interval = 1000 / fps;
 
-    function gameLoopFn() { if (!isGameRunning) return; update(); drawEverything(); if (isGameRunning) gameLoop = requestAnimationFrame(gameLoopFn); }
+   function gameLoopFn() {
+      if (!isGameRunning) return;
+
+      // Richiede subito il prossimo frame al browser
+      gameLoop = requestAnimationFrame(gameLoopFn);
+
+      const now = Date.now();
+      const delta = now - lastTime;
+
+      // Esegue update e draw SOLO se sono passati almeno 16.6ms (1/60 di secondo)
+      if (delta > interval) {
+        // Aggiusta lastTime sottraendo il delta in eccesso per mantenere il ritmo costante
+        lastTime = now - (delta % interval);
+        
+        update();
+        drawEverything();
+      }
+    }
 
     function startGame() {
       // 1. FERMA EVENTUALI LOOP PRECEDENTI (RISOLVE IL PROBLEMA VELOCITÀ)
