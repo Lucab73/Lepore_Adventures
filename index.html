@@ -1274,8 +1274,8 @@ coinList.push({
                 balloonY = -115; // Più in alto per il cappellone da cuoco
                 rectY = -138;
             } else if (e.type === 'normal') { // Il pensionato col cappello brutto
-                balloonY = -72; // Rialzato per non coprire il testo
-                rectY = -95;
+                balloonY = -90; // Rialzato per non coprire il testo
+                rectY = -113;
             }
             
             ctx.font = 'bold 16px Arial'; ctx.fillStyle = 'white'; ctx.strokeStyle = 'black'; ctx.lineWidth = 2; 
@@ -1489,35 +1489,35 @@ coinList.push({
       ctx.fillStyle = '#f8fafc';
       ctx.strokeStyle = '#1f2937'; ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(-18, -59);
-      ctx.lineTo(18, -59);
-      ctx.lineTo(16, -75);
-      ctx.lineTo(-16, -75);
+      ctx.moveTo(-18, -52);
+      ctx.lineTo(18, -52);
+      ctx.lineTo(16, -68);
+      ctx.lineTo(-16, -68);
       ctx.closePath();
       ctx.fill(); ctx.stroke();
       // Riga ombra interna banda
       ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(-15,-65); ctx.lineTo(15,-65); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-15,-58); ctx.lineTo(15,-58); ctx.stroke();
       // -- Lobi gonfi sopra la banda: 3 lobi (sx, centro, dx) --
       ctx.fillStyle = '#f8fafc';
       ctx.strokeStyle = '#1f2937'; ctx.lineWidth = 2;
       // Lobo sinistro
-      ctx.beginPath(); ctx.arc(-13, -85, 11, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.arc(-13, -78, 11, 0, Math.PI*2); ctx.fill(); ctx.stroke();
       // Lobo destro
-      ctx.beginPath(); ctx.arc(13, -85, 11, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.arc(13, -78, 11, 0, Math.PI*2); ctx.fill(); ctx.stroke();
       // Lobo centrale (più grande)
-      ctx.beginPath(); ctx.arc(0, -89, 14, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.arc(0, -82, 14, 0, Math.PI*2); ctx.fill(); ctx.stroke();
       // Copertura giunzione banda-lobi (riempie lo spazio tra banda e cerchi)
       ctx.fillStyle = '#f8fafc';
-      ctx.fillRect(-18, -86, 36, 12);
+      ctx.fillRect(-18, -79, 36, 12);
       // Ridisegna il bordo superiore della banda sopra il fill
       ctx.strokeStyle = '#1f2937'; ctx.lineWidth = 2;
       ctx.beginPath(); ctx.moveTo(-18,-75); ctx.lineTo(18,-75); ctx.stroke();
       // Linee curve interne dei lobi (dettaglio cartoon)
       ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1.5;
-      ctx.beginPath(); ctx.arc(-13,-85,7,Math.PI*1.1,Math.PI*1.9); ctx.stroke();
-      ctx.beginPath(); ctx.arc(13,-85,7,Math.PI*1.1,Math.PI*1.9); ctx.stroke();
-      ctx.beginPath(); ctx.arc(0,-89,10,Math.PI*1.1,Math.PI*1.9); ctx.stroke();
+      ctx.beginPath(); ctx.arc(-13,-78,7,Math.PI*1.1,Math.PI*1.9); ctx.stroke();
+      ctx.beginPath(); ctx.arc(13,-78,7,Math.PI*1.1,Math.PI*1.9); ctx.stroke();
+      ctx.beginPath(); ctx.arc(0,-82,10,Math.PI*1.1,Math.PI*1.9); ctx.stroke();
     }
 
     function drawResidente(ctx, e) {
