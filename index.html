@@ -1269,13 +1269,13 @@ coinList.push({
             // Alza il fumetto se il cappello è alto
             if (e.type === 'fdi') { 
                 balloonY = -127; 
-                rectY = -150; 
+                rectY = -140; 
             } else if (e.type === 'commerciante') {
-                balloonY = -147; // Più in alto per il cappellone da cuoco
-                rectY = -170;
+                balloonY = -137; // Più in alto per il cappellone da cuoco
+                rectY = -160;
             } else if (e.type === 'normal') { // Il pensionato col cappello brutto
-                balloonY = -107; // Rialzato per non coprire il testo
-                rectY = -130;
+                balloonY = -97; // Rialzato per non coprire il testo
+                rectY = -120;
             }
             
             ctx.font = 'bold 16px Arial'; ctx.fillStyle = 'white'; ctx.strokeStyle = 'black'; ctx.lineWidth = 2; 
@@ -1468,7 +1468,7 @@ coinList.push({
       ctx.beginPath(); ctx.arc(-22,10,5,0,Math.PI*2); ctx.fill();
       ctx.beginPath(); ctx.arc(22,10,5,0,Math.PI*2); ctx.fill();
       
-      // === FACCIA sopra tutto ===
+      // === FACCIA ===
       ctx.fillStyle = '#fca5a5'; ctx.beginPath(); ctx.arc(0,-36,16,0,Math.PI*2); ctx.fill();
       ctx.strokeStyle = '#e0a080'; ctx.lineWidth=1; ctx.stroke();
       // Occhi
@@ -1489,35 +1489,35 @@ coinList.push({
       ctx.fillStyle = '#f8fafc';
       ctx.strokeStyle = '#1f2937'; ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(-18, -36);
-      ctx.lineTo(18, -36);
-      ctx.lineTo(16, -52);
-      ctx.lineTo(-16, -52);
+      ctx.moveTo(-18, -51);
+      ctx.lineTo(18, -51);
+      ctx.lineTo(16, -67);
+      ctx.lineTo(-16, -67);
       ctx.closePath();
       ctx.fill(); ctx.stroke();
       // Riga ombra interna banda
       ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(-15,-42); ctx.lineTo(15,-42); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-15,-57); ctx.lineTo(15,-57); ctx.stroke();
       // -- Lobi gonfi sopra la banda: 3 lobi (sx, centro, dx) --
       ctx.fillStyle = '#f8fafc';
       ctx.strokeStyle = '#1f2937'; ctx.lineWidth = 2;
       // Lobo sinistro
-      ctx.beginPath(); ctx.arc(-13, -62, 11, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.arc(-13, -77, 11, 0, Math.PI*2); ctx.fill(); ctx.stroke();
       // Lobo destro
-      ctx.beginPath(); ctx.arc(13, -62, 11, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.arc(13, -77, 11, 0, Math.PI*2); ctx.fill(); ctx.stroke();
       // Lobo centrale (più grande)
-      ctx.beginPath(); ctx.arc(0, -66, 14, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.arc(0, -81, 14, 0, Math.PI*2); ctx.fill(); ctx.stroke();
       // Copertura giunzione banda-lobi (riempie lo spazio tra banda e cerchi)
       ctx.fillStyle = '#f8fafc';
-      ctx.fillRect(-18, -63, 36, 12);
+      ctx.fillRect(-18, -78, 36, 12);
       // Ridisegna il bordo superiore della banda sopra il fill
       ctx.strokeStyle = '#1f2937'; ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.moveTo(-18,-52); ctx.lineTo(18,-52); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-18,-67); ctx.lineTo(18,-67); ctx.stroke();
       // Linee curve interne dei lobi (dettaglio cartoon)
       ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1.5;
-      ctx.beginPath(); ctx.arc(-13,-62,7,Math.PI*1.1,Math.PI*1.9); ctx.stroke();
-      ctx.beginPath(); ctx.arc(13,-62,7,Math.PI*1.1,Math.PI*1.9); ctx.stroke();
-      ctx.beginPath(); ctx.arc(0,-66,10,Math.PI*1.1,Math.PI*1.9); ctx.stroke();
+      ctx.beginPath(); ctx.arc(-13,-77,7,Math.PI*1.1,Math.PI*1.9); ctx.stroke();
+      ctx.beginPath(); ctx.arc(13,-77,7,Math.PI*1.1,Math.PI*1.9); ctx.stroke();
+      ctx.beginPath(); ctx.arc(0,-81,10,Math.PI*1.1,Math.PI*1.9); ctx.stroke();
     }
 
     function drawResidente(ctx, e) {
