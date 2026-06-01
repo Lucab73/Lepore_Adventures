@@ -714,8 +714,8 @@ coinList.push({
              } else if (lvl !== 7) {
                  let speed = (lvl >= 4) ? 4 + lvl * 0.2 : 2 + lvl * 0.5; if (lvl === 5 && platType === 'moving') speed = speed * 0.4;
                  let parentRef = (platType === 'falling' || platType === 'moving') ? platform : null;
-                 // Distribuzione mista dei tipi di nemico
-                 const citizenTypes = ['normal', 'pendolare', 'commerciante', 'residente'];
+                 // Sulle piattaforme: solo normal, commerciante, residente (il pendolare sta solo a terra)
+                 const citizenTypes = ['normal', 'normal', 'commerciante', 'residente'];
                  const randomType = citizenTypes[Math.floor(Math.random() * citizenTypes.length)];
                  enemies.push({ x: centerX, y: py - 70, width: 50, height: 70, vx: speed, originalVx: speed, facing: 1, type: randomType, platformX: platform.x, platformW: pw, walkFrame: 0, state: 'walking', timer: Math.floor(Math.random() * 290) + 10, currentPhrase: "", isFired: false, parentPlatform: parentRef });
                  if (Math.random() > 0.85 && powerupsSpawned < 2) { powerups.push({ x: platform.x + gapX / 2, y: groundY - 50, collected: false }); powerupsSpawned++; }
@@ -1438,17 +1438,14 @@ coinList.push({
       // Corpo base (camicia)
       ctx.fillStyle = '#d97706'; ctx.fillRect(-15, -20, 30, 45);
       ctx.strokeStyle = '#92400e'; ctx.lineWidth = 1; ctx.strokeRect(-15,-20,30,45);
-      // --- GREMBIULE BORDEAUX/MARRONE sopra il corpo ---
-      ctx.fillStyle = '#7f1d1d'; // bordeaux
-      // Bib (parte alta grembiule)
+      // --- GREMBIULE BORDEAUX sopra il corpo ---
+      ctx.fillStyle = '#7f1d1d';
       ctx.beginPath(); ctx.roundRect(-10, -18, 20, 18, 3); ctx.fill();
-      // Corpo grembiule (parte bassa)
       ctx.fillRect(-13, 0, 26, 25);
-      ctx.strokeStyle = '#450a0a'; ctx.lineWidth = 1;
-      ctx.strokeRect(-13, 0, 26, 25);
-      // Taschino grembiule
+      ctx.strokeStyle = '#450a0a'; ctx.lineWidth = 1; ctx.strokeRect(-13, 0, 26, 25);
+      // Taschino
       ctx.fillStyle = '#991b1b'; ctx.fillRect(-8, 5, 12, 8); ctx.strokeStyle='#450a0a'; ctx.lineWidth=1; ctx.strokeRect(-8,5,12,8);
-      // Legacci laterali grembiule
+      // Legacci
       ctx.strokeStyle = '#7f1d1d'; ctx.lineWidth = 2;
       ctx.beginPath(); ctx.moveTo(-13,2); ctx.lineTo(-17,2); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(13,2); ctx.lineTo(17,2); ctx.stroke();
@@ -1458,55 +1455,62 @@ coinList.push({
       ctx.beginPath(); ctx.moveTo(15,-10); ctx.lineTo(22, 8); ctx.stroke();
       ctx.fillStyle = '#fca5a5'; ctx.beginPath(); ctx.arc(-22,10,5,0,Math.PI*2); ctx.fill();
       ctx.beginPath(); ctx.arc(22,10,5,0,Math.PI*2); ctx.fill();
-      // Faccia
-      ctx.fillStyle = '#fca5a5'; ctx.beginPath(); ctx.arc(0,-34,16,0,Math.PI*2); ctx.fill();
-      ctx.fillStyle='#000'; ctx.beginPath(); ctx.arc(-5,-37,2,0,Math.PI*2); ctx.arc(5,-37,2,0,Math.PI*2); ctx.fill();
-      ctx.strokeStyle='#000'; ctx.lineWidth=1.5;
-      ctx.beginPath(); ctx.moveTo(-9,-43); ctx.lineTo(-3,-40); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(9,-43); ctx.lineTo(3,-40); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(-4,-27); ctx.lineTo(4,-27); ctx.stroke();
-      // --- CAPPELLO DA CUOCO BIANCO: rettangolo verticale + ovale/cerchio sopra ---
-      // Base rettangolare del cappello (molto visibile)
+      // --- CAPPELLO DA CUOCO (disegnato PRIMA della faccia così non la copre) ---
+      // Banda bianca (rettangolo verticale alla base)
       ctx.fillStyle = '#ffffff';
-      ctx.fillRect(-14, -54, 28, 18); // banda
-      ctx.strokeStyle = '#d1d5db'; ctx.lineWidth = 1.5; ctx.strokeRect(-14,-54,28,18);
-      // Pallone bianco sopra (toque) - grande e rotondo
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath(); ctx.ellipse(0, -65, 16, 13, 0, 0, Math.PI*2); ctx.fill();
-      ctx.strokeStyle = '#d1d5db'; ctx.lineWidth = 1.5; ctx.stroke();
-      // Riga orizzontale banda
+      ctx.fillRect(-14, -54, 28, 20);
+      ctx.strokeStyle = '#d1d5db'; ctx.lineWidth = 1.5; ctx.strokeRect(-14,-54,28,20);
+      // Riga decorativa sulla banda
       ctx.strokeStyle = '#9ca3af'; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(-14,-50); ctx.lineTo(14,-50); ctx.stroke();
+      // Toque (pallone bianco sopra)
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.ellipse(0, -66, 16, 14, 0, 0, Math.PI*2); ctx.fill();
+      ctx.strokeStyle = '#d1d5db'; ctx.lineWidth = 1.5; ctx.stroke();
+      // --- FACCIA (sopra tutto, non coperta dal cappello) ---
+      ctx.fillStyle = '#fca5a5'; ctx.beginPath(); ctx.arc(0,-34,16,0,Math.PI*2); ctx.fill();
+      // Occhi neri ben visibili
+      ctx.fillStyle = '#000';
+      ctx.beginPath(); ctx.arc(-5,-37,2.5,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(5,-37,2.5,0,Math.PI*2); ctx.fill();
+      // Luccichio occhi
+      ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.arc(-4,-38,1,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(6,-38,1,0,Math.PI*2); ctx.fill();
+      // Sopracciglia arrabbiate
+      ctx.strokeStyle='#000'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(-9,-43); ctx.lineTo(-3,-40); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(9,-43); ctx.lineTo(3,-40); ctx.stroke();
+      // Bocca scontenta
+      ctx.beginPath(); ctx.moveTo(-5,-27); ctx.lineTo(5,-27); ctx.stroke();
     }
 
     function drawResidente(ctx, e) {
-      // RESIDENTE: pigiama azzurro/righe, ciabatte, berretto da notte con pon-pon
-      // Ciabatte ai piedi (pantofoloni arancioni)
+      // RESIDENTE: pigiama azzurro a righe, ciabatte, berretto da notte a cono con pon-pon
+      // Ciabatte ai piedi
       ctx.fillStyle = '#f97316';
-      ctx.beginPath(); ctx.roundRect(-18, 35, 20, 10, 5); ctx.fill(); // ciabatta sx
-      ctx.beginPath(); ctx.roundRect(0, 35, 20, 10, 5); ctx.fill();  // ciabatta dx
+      ctx.beginPath(); ctx.roundRect(-18, 35, 20, 10, 5); ctx.fill();
+      ctx.beginPath(); ctx.roundRect(0, 35, 20, 10, 5); ctx.fill();
       ctx.strokeStyle = '#ea580c'; ctx.lineWidth = 1;
       ctx.strokeRect(-18,35,20,10); ctx.strokeRect(0,35,20,10);
-      // Gambe pigiama (azzurro chiaro con righe)
+      // Gambe pigiama azzurro a righe
       ctx.fillStyle = '#bae6fd';
-      ctx.fillRect(-13, 20, 12, 16);
-      ctx.fillRect(1, 20, 12, 16);
-      // Righe orizzontali gambe
+      ctx.fillRect(-13, 20, 12, 16); ctx.fillRect(1, 20, 12, 16);
       ctx.strokeStyle = '#7dd3fc'; ctx.lineWidth = 1.5;
       for(let ry = 24; ry <= 34; ry += 5) {
         ctx.beginPath(); ctx.moveTo(-13, ry); ctx.lineTo(-1, ry); ctx.stroke();
         ctx.beginPath(); ctx.moveTo(1, ry); ctx.lineTo(13, ry); ctx.stroke();
       }
-      // Corpo pigiama
+      // Corpo pigiama a righe
       ctx.fillStyle = '#bae6fd';
       ctx.fillRect(-17, -20, 34, 42);
       ctx.strokeStyle = '#7dd3fc'; ctx.lineWidth = 1; ctx.strokeRect(-17,-20,34,42);
-      // Righe orizzontali corpo
       for(let ry = -15; ry <= 20; ry += 7) {
         ctx.beginPath(); ctx.moveTo(-17, ry); ctx.lineTo(17, ry); ctx.stroke();
       }
-      // Abbottonatura centrale
-      ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(0,-10,2,0,Math.PI*2); ctx.fill();
+      // Abbottonatura
+      ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.arc(0,-10,2,0,Math.PI*2); ctx.fill();
       ctx.beginPath(); ctx.arc(0,0,2,0,Math.PI*2); ctx.fill();
       ctx.beginPath(); ctx.arc(0,10,2,0,Math.PI*2); ctx.fill();
       // Braccia
@@ -1516,37 +1520,52 @@ coinList.push({
       ctx.fillStyle = '#fca5a5';
       ctx.beginPath(); ctx.arc(-23,10,5,0,Math.PI*2); ctx.fill();
       ctx.beginPath(); ctx.arc(23,10,5,0,Math.PI*2); ctx.fill();
-      // Faccia
-      ctx.fillStyle = '#fca5a5'; ctx.beginPath(); ctx.arc(0,-34,16,0,Math.PI*2); ctx.fill();
-      ctx.fillStyle='#000';
-      ctx.beginPath(); ctx.arc(-5,-37,2,0,Math.PI*2); ctx.arc(5,-37,2,0,Math.PI*2); ctx.fill();
-      // Sopracciglia arrabbiate
-      ctx.strokeStyle='#000'; ctx.lineWidth=1.5;
-      ctx.beginPath(); ctx.moveTo(-9,-43); ctx.lineTo(-3,-40); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(9,-43); ctx.lineTo(3,-40); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(-4,-27); ctx.lineTo(4,-27); ctx.stroke();
-      // --- BERRETTO DA NOTTE CON PON-PON ---
-      // Triangolo che pende di lato (inclinato)
+      // --- BERRETTO DA NOTTE A CONO LUNGO (disegnato PRIMA della faccia) ---
+      // Il cono pende verso destra, con la punta in alto a destra
       ctx.save();
-      ctx.translate(0, -50);
-      ctx.rotate(0.35); // inclinato
-      // Corpo berretto: triangolo bianco con punta verso dx
-      ctx.fillStyle = '#ffffff';
+      ctx.translate(0, -50); // centro sulla testa
+      ctx.rotate(0.3);       // inclinato verso destra
+      // Cono allungato: triangolo con base larga in basso e punta lunga in alto
+      ctx.fillStyle = '#1d4ed8'; // blu notte
       ctx.beginPath();
-      ctx.moveTo(-16, -8);  // base sx
-      ctx.lineTo(16, -8);   // base dx
-      ctx.lineTo(20, -22);  // punta
+      ctx.moveTo(-14, 0);   // angolo base sx
+      ctx.lineTo(14, 0);    // angolo base dx
+      ctx.lineTo(4, -45);   // punta del cono (lunga e sottile)
       ctx.closePath();
       ctx.fill();
-      ctx.strokeStyle = '#d1d5db'; ctx.lineWidth = 1.5; ctx.stroke();
-      // Striscia colorata sul berretto
-      ctx.fillStyle = '#bae6fd';
-      ctx.fillRect(-14, -16, 30, 5);
-      // Pon-pon: pallino rosso alla punta
+      ctx.strokeStyle = '#1e40af'; ctx.lineWidth = 1.5; ctx.stroke();
+      // Strisce bianche sul berretto
+      ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(-10, -8); ctx.lineTo(8, -8); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-7, -18); ctx.lineTo(6, -18); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-4, -28); ctx.lineTo(5, -28); ctx.stroke();
+      // Bordo base berretto (risvolto bianco)
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(-15, -4, 30, 7);
+      ctx.strokeStyle = '#d1d5db'; ctx.lineWidth = 1; ctx.strokeRect(-15,-4,30,7);
+      // --- PON-PON rosso alla punta del cono ---
       ctx.fillStyle = '#ef4444';
-      ctx.beginPath(); ctx.arc(20, -22, 5, 0, Math.PI*2); ctx.fill();
-      ctx.strokeStyle = '#dc2626'; ctx.lineWidth = 1; ctx.stroke();
+      ctx.beginPath(); ctx.arc(4, -45, 6, 0, Math.PI*2); ctx.fill();
+      ctx.strokeStyle = '#dc2626'; ctx.lineWidth = 1.5; ctx.stroke();
+      // Luccichio pon-pon
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.beginPath(); ctx.arc(2, -47, 2, 0, Math.PI*2); ctx.fill();
       ctx.restore();
+      // --- FACCIA (sopra il berretto) ---
+      ctx.fillStyle = '#fca5a5'; ctx.beginPath(); ctx.arc(0,-34,16,0,Math.PI*2); ctx.fill();
+      // Occhi
+      ctx.fillStyle='#000';
+      ctx.beginPath(); ctx.arc(-5,-37,2.5,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(5,-37,2.5,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='#fff';
+      ctx.beginPath(); ctx.arc(-4,-38,1,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(6,-38,1,0,Math.PI*2); ctx.fill();
+      // Sopracciglia arrabbiate
+      ctx.strokeStyle='#000'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(-9,-43); ctx.lineTo(-3,-40); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(9,-43); ctx.lineTo(3,-40); ctx.stroke();
+      // Bocca scontenta
+      ctx.beginPath(); ctx.moveTo(-5,-27); ctx.lineTo(5,-27); ctx.stroke();
     }
 
     function drawStandardEnemy(ctx, e) {
