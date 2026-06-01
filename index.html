@@ -1273,9 +1273,9 @@ coinList.push({
             } else if (e.type === 'commerciante') {
                 balloonY = -115; // Più in alto per il cappellone da cuoco
                 rectY = -138;
-            } else if (e.type === 'normal') { // Il pensionato col cappello brutto
-                balloonY = -90; // Rialzato per non coprire il testo
-                rectY = -113;
+            } else if (e.type === 'residente') { // Il pensionato col cappello brutto
+                balloonY = -100; // Rialzato per non coprire il testo
+                rectY = -123;
             }
             
             ctx.font = 'bold 16px Arial'; ctx.fillStyle = 'white'; ctx.strokeStyle = 'black'; ctx.lineWidth = 2; 
@@ -1485,19 +1485,20 @@ coinList.push({
       // Bocca scontenta
       ctx.beginPath(); ctx.arc(0,-29,4,0,Math.PI); ctx.stroke();
 // === CAPPELLO DA CUOCO (ispirato al reference: banda + lobi gonfi) ===
-      // -- Banda base (rettangolo largo e curvo in basso) --
+      // -- Banda base (curvata in basso per avvolgere la testa) --
       ctx.fillStyle = '#f8fafc';
       ctx.strokeStyle = '#1f2937'; ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(-18, -52);
-      ctx.lineTo(18, -52);
-      ctx.lineTo(16, -68);
-      ctx.lineTo(-16, -68);
+      ctx.moveTo(-16, -68); // Spigolo alto sx
+      ctx.lineTo(16, -68); // Spigolo alto dx
+      ctx.lineTo(16, -49); // Spigolo basso dx (scende sui lati della testa)
+      // Curva che segue la rotondità della fronte verso il centro
+      ctx.quadraticCurveTo(0, -44, -18, -49); 
       ctx.closePath();
       ctx.fill(); ctx.stroke();
-      // Riga ombra interna banda
+      // Riga ombra interna banda (curvata anch'essa)
       ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(-15,-58); ctx.lineTo(15,-58); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-15,-59); ctx.quadraticCurveTo(0, -54, 15, -59); ctx.stroke();
       // -- Lobi gonfi sopra la banda: 3 lobi (sx, centro, dx) --
       ctx.fillStyle = '#f8fafc';
       ctx.strokeStyle = '#1f2937'; ctx.lineWidth = 2;
@@ -1512,7 +1513,7 @@ coinList.push({
       ctx.fillRect(-18, -79, 36, 12);
       // Ridisegna il bordo superiore della banda sopra il fill
       ctx.strokeStyle = '#1f2937'; ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.moveTo(-18,-75); ctx.lineTo(18,-75); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-16,-68); ctx.lineTo(16,-68); ctx.stroke();
       // Linee curve interne dei lobi (dettaglio cartoon)
       ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1.5;
       ctx.beginPath(); ctx.arc(-13,-78,7,Math.PI*1.1,Math.PI*1.9); ctx.stroke();
