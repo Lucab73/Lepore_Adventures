@@ -714,8 +714,8 @@ coinList.push({
              } else if (lvl !== 7) {
                  let speed = (lvl >= 4) ? 4 + lvl * 0.2 : 2 + lvl * 0.5; if (lvl === 5 && platType === 'moving') speed = speed * 0.4;
                  let parentRef = (platType === 'falling' || platType === 'moving') ? platform : null;
-                 // Sulle piattaforme: solo normal, commerciante, residente (il pendolare sta solo a terra)
-                 const citizenTypes = ['normal', 'normal', 'commerciante', 'residente'];
+                 // Sulle piattaforme: normal, commerciante, pensionato (NO pendolare - lui sta solo a terra)
+                 const citizenTypes = ['normal', 'commerciante', 'residente', 'commerciante'];
                  const randomType = citizenTypes[Math.floor(Math.random() * citizenTypes.length)];
                  enemies.push({ x: centerX, y: py - 70, width: 50, height: 70, vx: speed, originalVx: speed, facing: 1, type: randomType, platformX: platform.x, platformW: pw, walkFrame: 0, state: 'walking', timer: Math.floor(Math.random() * 290) + 10, currentPhrase: "", isFired: false, parentPlatform: parentRef });
                  if (Math.random() > 0.85 && powerupsSpawned < 2) { powerups.push({ x: platform.x + gapX / 2, y: groundY - 50, collected: false }); powerupsSpawned++; }
@@ -749,8 +749,8 @@ coinList.push({
                 if (lvl === 5) { for (let obs of obstacles) { if (Math.abs(sX - obs.x) < 120) { safePosition = false; break; } } }
                 if (safePosition) { let neighbors = 0; for (let e of enemies) { if ((e.type === 'striker' || e.type === 'pendolare') && Math.abs(sX - e.x) < 350) { neighbors++; } } if (neighbors >= 2) { safePosition = false; } }
                 if (safePosition) {
-                    // Mix tra pendolare (principale) e altri tipi cittadini
-                    const groundTypes = ['pendolare', 'pendolare', 'commerciante', 'residente'];
+                    // A terra: prevalenza pendolare, qualche normal (commerciante e pensionato solo sulle piattaforme)
+                    const groundTypes = ['pendolare', 'pendolare', 'pendolare', 'normal'];
                     const gType = groundTypes[Math.floor(Math.random() * groundTypes.length)];
                     enemies.push({ x: sX, y: groundY - 70, width: 50, height: 70, vx: 0, originalVx: 0, facing: 1, type: gType, platformX: 0, platformW: levelWidth, walkFrame: 0, state: 'idle', timer: 0, currentPhrase: "", isFired: false });
                     createdStrikers++;
@@ -1432,7 +1432,7 @@ coinList.push({
     }
 
     function drawCommerciant(ctx, e) {
-      // COMMERCIANTE: grembiule bordeaux, cappello da cuoco bianco ben visibile
+      // COMMERCIANTE: grembiule bordeaux, cappello da cuoco con lobi gonfi
       // --- Gambe ---
       ctx.fillStyle = '#292524'; ctx.fillRect(-12, 20, 10, 25); ctx.fillRect(2, 20, 10, 25);
       // --- Corpo + grembiule bordeaux ---
@@ -1452,27 +1452,43 @@ coinList.push({
       ctx.fillStyle = '#fca5a5';
       ctx.beginPath(); ctx.arc(-22,10,5,0,Math.PI*2); ctx.fill();
       ctx.beginPath(); ctx.arc(22,10,5,0,Math.PI*2); ctx.fill();
-      // === CAPPELLO DA CUOCO: banda larga + toque gonfia, PRIMA della faccia ===
-      // Banda bianca larga e alta (la parte rigida del cappello)
+      // === CAPPELLO DA CUOCO (ispirato al reference: banda + lobi gonfi) ===
+      // -- Banda base (rettangolo largo e curvo in basso) --
       ctx.fillStyle = '#f8fafc';
-      ctx.fillRect(-16, -58, 32, 22);
-      ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 2; ctx.strokeRect(-16, -58, 32, 22);
-      // Due righe orizzontali decorative sulla banda
+      ctx.strokeStyle = '#1f2937'; ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-18, -36);
+      ctx.lineTo(18, -36);
+      ctx.lineTo(16, -52);
+      ctx.lineTo(-16, -52);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+      // Riga ombra interna banda
       ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(-16,-52); ctx.lineTo(16,-52); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(-16,-47); ctx.lineTo(16,-47); ctx.stroke();
-      // Toque (cupola gonfia): ellisse bianca ben grande sopra la banda
+      ctx.beginPath(); ctx.moveTo(-15,-42); ctx.lineTo(15,-42); ctx.stroke();
+      // -- Lobi gonfi sopra la banda: 3 lobi (sx, centro, dx) --
       ctx.fillStyle = '#f8fafc';
-      ctx.beginPath(); ctx.ellipse(0, -68, 19, 16, 0, 0, Math.PI*2); ctx.fill();
-      ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 2; ctx.stroke();
-      // Pieghette della toque (linee verticali leggere)
-      ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1;
-      for(let px2 = -12; px2 <= 12; px2 += 6) {
-        ctx.beginPath(); ctx.moveTo(px2, -58); ctx.lineTo(px2 * 0.7, -74); ctx.stroke();
-      }
-      // === FACCIA (sopra il cappello) ===
+      ctx.strokeStyle = '#1f2937'; ctx.lineWidth = 2;
+      // Lobo sinistro
+      ctx.beginPath(); ctx.arc(-13, -62, 11, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+      // Lobo destro
+      ctx.beginPath(); ctx.arc(13, -62, 11, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+      // Lobo centrale (più grande)
+      ctx.beginPath(); ctx.arc(0, -66, 14, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+      // Copertura giunzione banda-lobi (riempie lo spazio tra banda e cerchi)
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(-18, -63, 36, 12);
+      // Ridisegna il bordo superiore della banda sopra il fill
+      ctx.strokeStyle = '#1f2937'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(-18,-52); ctx.lineTo(18,-52); ctx.stroke();
+      // Linee curve interne dei lobi (dettaglio cartoon)
+      ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(-13,-62,7,Math.PI*1.1,Math.PI*1.9); ctx.stroke();
+      ctx.beginPath(); ctx.arc(13,-62,7,Math.PI*1.1,Math.PI*1.9); ctx.stroke();
+      ctx.beginPath(); ctx.arc(0,-66,10,Math.PI*1.1,Math.PI*1.9); ctx.stroke();
+      // === FACCIA sopra tutto ===
       ctx.fillStyle = '#fca5a5'; ctx.beginPath(); ctx.arc(0,-36,16,0,Math.PI*2); ctx.fill();
-      ctx.strokeStyle = '#e0a080'; ctx.lineWidth = 1; ctx.stroke();
+      ctx.strokeStyle = '#e0a080'; ctx.lineWidth=1; ctx.stroke();
       // Occhi
       ctx.fillStyle = '#000';
       ctx.beginPath(); ctx.arc(-5,-39,3,0,Math.PI*2); ctx.fill();
@@ -1490,10 +1506,16 @@ coinList.push({
 
     function drawResidente(ctx, e) {
       // PENSIONATO: gobbo, cappotto grigio, barba bianca, bastone
-      // === BASTONE (dietro tutto) ===
-      ctx.strokeStyle = '#78350f'; ctx.lineWidth = 4; ctx.lineCap = 'round';
+      // === BASTONE (dietro tutto) - grigio chiaro per staccarsi dalle piattaforme marroni ===
+      ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 4; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(22, 42); ctx.lineTo(18, -15); ctx.stroke();
+      // Bordo scuro per definizione
+      ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1.5;
       ctx.beginPath(); ctx.moveTo(22, 42); ctx.lineTo(18, -15); ctx.stroke();
       // Impugnatura bastone a J
+      ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.arc(13, -15, 5, Math.PI*1.5, Math.PI*0.5, true); ctx.stroke();
+      ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 1.5;
       ctx.beginPath(); ctx.arc(13, -15, 5, Math.PI*1.5, Math.PI*0.5, true); ctx.stroke();
       // === Scarpe (larghe, da vecchio) ===
       ctx.fillStyle = '#1c1917';
