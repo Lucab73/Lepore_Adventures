@@ -1276,6 +1276,9 @@ coinList.push({
             } else if (e.type === 'residente') { // Il pensionato col cappello brutto
                 balloonY = -100; // Rialzato per non coprire il testo
                 rectY = -123;
+            } else if (e.type === 'normal') { // Il cittadino comune
+                balloonY = -98; // Rialzato per non coprire il testo
+                rectY = -121; 
             }
             
             ctx.font = 'bold 16px Arial'; ctx.fillStyle = 'white'; ctx.strokeStyle = 'black'; ctx.lineWidth = 2; 
