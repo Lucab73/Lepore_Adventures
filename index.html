@@ -1308,8 +1308,8 @@ if (lvl === 1) {
             // Sostituzione inline o chiamata alla funzione del commerciante corretta
             drawCommerciant(ctx, e);
         }
-        else if (e.type === 'residente') {
-            drawResidente(ctx, e);
+        else if (e.type === 'pensionato') {
+            drawPensionato(ctx, e);
         }
         else if (e.type === 'alluvionato') {
             // ... (lascia invariato il codice dell'alluvionato se presente)
@@ -1532,7 +1532,7 @@ if (lvl === 1) {
       ctx.beginPath(); ctx.arc(0,-82,10,Math.PI*1.1,Math.PI*1.9); ctx.stroke();
     }
 
-    function drawResidente(ctx, e) {
+    function drawPensionato(ctx, e) {
       // PENSIONATO: gobbo, cappotto grigio, barba bianca, bastone
       // === BASTONE (dietro tutto) - grigio chiaro per staccarsi dalle piattaforme marroni ===
       ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 4; ctx.lineCap = 'round';
