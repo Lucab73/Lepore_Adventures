@@ -818,8 +818,47 @@ if (lvl === 1) {
 
     // --- DISEGNO ENTITÀ E MONDO ---
     function drawTombstone(x, y) { ctx.save(); ctx.translate(x, y); ctx.fillStyle = '#9ca3af'; ctx.beginPath(); ctx.arc(0, -10, 20, Math.PI, 0); ctx.lineTo(20, 20); ctx.lineTo(-20, 20); ctx.fill(); ctx.fillStyle = '#4b5563'; ctx.fillRect(-25, 20, 50, 8); ctx.fillStyle = '#374151'; ctx.font = 'bold 10px monospace'; ctx.textAlign = 'center'; ctx.fillText("R.I.P.", 0, 0); ctx.restore(); }
-    function drawCardboardBox(x, y) { ctx.save(); ctx.translate(x, y); ctx.fillStyle = '#d4a373'; ctx.fillRect(-25, -25, 50, 35); ctx.fillStyle = '#c8935b'; ctx.fillRect(-25, -20, 50, 5); ctx.beginPath(); ctx.moveTo(-25, -25); ctx.lineTo(-30, -35); ctx.lineTo(-5, -35); ctx.lineTo(0, -25); ctx.fill(); ctx.beginPath(); ctx.moveTo(25, -25); ctx.lineTo(30, -35); ctx.lineTo(5, -35); ctx.lineTo(0, -25); ctx.fill(); ctx.fillStyle = '#000000'; ctx.beginPath(); ctx.moveTo(0, -10); ctx.lineTo(-6, 0); ctx.lineTo(-3, 0); ctx.lineTo(-3, 8); ctx.lineTo(3, 8); ctx.lineTo(3, 0); ctx.lineTo(6, 0); ctx.fill(); ctx.restore(); }
-    function drawSignWeapon(ctx, x, y) { 
+    
+function drawMulta(x, y) {
+        ctx.save();
+        ctx.translate(x, y);
+        // Foglio della multa
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillRect(-20, -30, 40, 50);
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(-20, -30, 40, 50);
+
+        // Intestazione rossa
+        ctx.fillStyle = '#ef4444';
+        ctx.fillRect(-20, -30, 40, 12);
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 9px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('MULTA', 0, -21);
+
+        // Righe di testo finte
+        ctx.fillStyle = '#475569';
+        ctx.fillRect(-15, -13, 30, 3);
+        ctx.fillRect(-15, -6, 20, 3);
+        ctx.fillRect(-15, 1, 25, 3);
+
+        // Timbro storto rosso "ZITTITO"
+        ctx.save();
+        ctx.translate(0, 10);
+        ctx.rotate(-0.2);
+        ctx.strokeStyle = '#dc2626';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(-16, 0, 32, 10);
+        ctx.fillStyle = '#dc2626';
+        ctx.font = '900 7px Arial';
+        ctx.fillText('ZITTITO', 0, 8);
+        ctx.restore();
+
+        ctx.restore();
+    }
+       
+function drawSignWeapon(ctx, x, y) { 
         ctx.save();
         ctx.translate(x, y);
         // Ombra
@@ -1644,7 +1683,7 @@ if (lvl === 1) {
     }
 
     function drawBoss(ctx, boss) {
-      if (boss.defeated) { drawCardboardBox(0, 20); return; }
+      if (boss.defeated) { drawMulta(0, 20); return; }
       if (boss.invulnTimer > 0 && Math.floor(Date.now() / 50) % 2 === 0) ctx.globalAlpha = 0.5;
       const barWidth = 60; const barHeight = 8; const barY = boss.type === 'confederale' ? -135 : -85;
       ctx.fillStyle = '#000'; ctx.fillRect(-barWidth / 2, barY, barWidth, barHeight); const healthPct = boss.health / boss.maxHealth;
@@ -1661,7 +1700,8 @@ if (lvl === 1) {
         ctx.strokeStyle = '#555'; ctx.lineWidth = 1.5;
         ctx.beginPath(); ctx.moveTo(0, -25); ctx.lineTo(0, 25); ctx.stroke();
         ctx.fillStyle = '#444'; ctx.fillRect(-18, -10, 10, 8); ctx.fillRect(8, -10, 10, 8);
-        ctx.fillStyle = '#2a2a2a'; ctx.fillRect(-34, -20, 12, 35); 
+        ctx.fillStyle = '#2a2a2a'; ctx.fillRect(-34, -20, 12, 35); // Braccio abbassato
+        ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(-28, 15, 6, 0, Math.PI * 2); ctx.fill(); // Guanto abbassato
         ctx.fillStyle = '#c0392b'; ctx.beginPath(); ctx.arc(0, -42, 22, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = '#111'; ctx.beginPath(); ctx.ellipse(0, -40, 16, 10, 0, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = 'rgba(255,255,255,0.15)'; ctx.beginPath(); ctx.ellipse(-4, -44, 8, 4, -0.3, 0, Math.PI * 2); ctx.fill();
@@ -1755,7 +1795,7 @@ if (lvl === 1) {
       if (isBossLevel) {
          bosses.forEach(boss => {
           if (!boss.defeated) { const sx = boss.x - cameraX; ctx.save(); ctx.translate(sx + boss.width / 2, boss.y + boss.height / 2); drawBoss(ctx, boss); ctx.restore(); }
-          else { const sx = boss.x - cameraX; ctx.save(); ctx.translate(sx + boss.width / 2, boss.y + boss.height / 2); drawCardboardBox(0, 20); ctx.restore(); }
+          else { const sx = boss.x - cameraX; ctx.save(); ctx.translate(sx + boss.width / 2, boss.y + boss.height / 2); drawMulta(0, 20); ctx.restore(); }
         });
       }
       manageAtmosphere();
