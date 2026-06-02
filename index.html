@@ -441,6 +441,14 @@
         "ZTL assassina!",
         "Aiutateci o chiudiamo!"
       ],
+      pensionato: [
+        "Ai miei tempi non era così!",
+        "Dove parcheggio adesso?!",
+        "Basta cantieri sotto casa!",
+        "Non si dorme più con questo rumore!",
+        "Hanno tolto pure i posteggi!",
+        "Voglio parlare col sindaco!"
+      ],
       residente: [
         "Ai miei tempi non era così!",
         "Dove parcheggio adesso?!",
@@ -714,8 +722,16 @@ coinList.push({
              } else if (lvl !== 7) {
                  let speed = (lvl >= 4) ? 4 + lvl * 0.2 : 2 + lvl * 0.5; if (lvl === 5 && platType === 'moving') speed = speed * 0.4;
                  let parentRef = (platType === 'falling' || platType === 'moving') ? platform : null;
-                 // Sulle piattaforme: normal, commerciante, pensionato (NO pendolare - lui sta solo a terra)
-                 const citizenTypes = ['normal', 'commerciante', 'residente', 'commerciante'];
+                 // Sulle piattaforme: solo pensionato e commerciante (NO normal, NO pendolare - lui sta solo a terra)
+                 // Livello 1: solo normal; Livello 2+: aggiunge pensionato; Livello 3+: aggiunge commerciante
+                 let citizenTypes;
+if (lvl === 1) {
+    citizenTypes = ['normal', 'normal', 'normal', 'pendolare'];
+} else if (lvl === 2) {
+    citizenTypes = ['normal', 'normal', 'pensionato', 'pensionato'];
+} else {
+    citizenTypes = ['normal', 'pensionato', 'commerciante', 'normal'];
+}
                  const randomType = citizenTypes[Math.floor(Math.random() * citizenTypes.length)];
                  enemies.push({ x: centerX, y: py - 70, width: 50, height: 70, vx: speed, originalVx: speed, facing: 1, type: randomType, platformX: platform.x, platformW: pw, walkFrame: 0, state: 'walking', timer: Math.floor(Math.random() * 290) + 10, currentPhrase: "", isFired: false, parentPlatform: parentRef });
                  if (Math.random() > 0.85 && powerupsSpawned < 2) { powerups.push({ x: platform.x + gapX / 2, y: groundY - 50, collected: false }); powerupsSpawned++; }
@@ -749,9 +765,9 @@ coinList.push({
                 if (lvl === 5) { for (let obs of obstacles) { if (Math.abs(sX - obs.x) < 120) { safePosition = false; break; } } }
                 if (safePosition) { let neighbors = 0; for (let e of enemies) { if ((e.type === 'striker' || e.type === 'pendolare') && Math.abs(sX - e.x) < 350) { neighbors++; } } if (neighbors >= 2) { safePosition = false; } }
                 if (safePosition) {
-                    // A terra: prevalenza pendolare, qualche normal (commerciante e pensionato solo sulle piattaforme)
-                    const groundTypes = ['pendolare', 'pendolare', 'pendolare', 'normal'];
-                    const gType = groundTypes[Math.floor(Math.random() * groundTypes.length)];
+                    // A terra: solo pendolare (con cartello NO TRAM). Il normal NON va a terra.
+                    // Il normal appare solo al livello 1 sulle piattaforme (non a terra).
+                    const gType = 'pendolare';
                     enemies.push({ x: sX, y: groundY - 70, width: 50, height: 70, vx: 0, originalVx: 0, facing: 1, type: gType, platformX: 0, platformW: levelWidth, walkFrame: 0, state: 'idle', timer: 0, currentPhrase: "", isFired: false });
                     createdStrikers++;
                 }
@@ -1794,7 +1810,7 @@ coinList.push({
         if (animatedCoins < targetCoins) { animatedCoins += speed; if (animatedCoins > targetCoins) animatedCoins = targetCoins; allDone = false; if (Math.random() > 0.7) playSound('coin'); }
         if (animatedFired < targetFired) { animatedFired += Math.ceil(speed / 10); if (animatedFired > targetFired) animatedFired = targetFired; allDone = false; if (Math.random() > 0.7) playSound('coin'); }
         if (animatedStrikers < targetStrikers) { animatedStrikers += Math.ceil(speed / 6); if (animatedStrikers > targetStrikers) animatedStrikers = targetStrikers; allDone = false; if (Math.random() > 0.7) playSound('coin'); }
-        ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#dc2626'; ctx.lineWidth = 4; ctx.font = 'bold 52px serif'; ctx.strokeText('COMPLIMENTI!', canvas.width / 2, canvas.height / 2 - 40); ctx.fillText('COMPLIMENTI!', canvas.width / 2, canvas.height / 2 - 40); ctx.font = 'bold 42px serif'; ctx.strokeText('HAI MESSO A TACERE', canvas.width / 2, canvas.height / 2 + 20); ctx.fillText('HAI MESSO A TACERE', canvas.width / 2, canvas.height / 2 + 20); ctx.strokeText('GLI SCONTENTI', canvas.width / 2, canvas.height / 2 + 70); ctx.fillText('GLI SCONTENTI', canvas.width / 2, canvas.height / 2 + 70); ctx.fillStyle = '#ffffff'; ctx.font = 'bold 32px serif'; ctx.fillText(`💰 Fondi accumulati: €${animatedCoins}`, canvas.width / 2, canvas.height / 2 + 140); ctx.fillStyle = '#ff4444'; ctx.fillText(`👷 Cittadini zittiti: ${animatedFired}`, canvas.width / 2, canvas.height / 2 + 190); ctx.fillStyle = '#ff9900'; ctx.fillText(`✊ NO TRAM zittiti: ${animatedStrikers}`, canvas.width / 2, canvas.height / 2 + 240);
+        const vc = canvas.height / 2 - 110; ctx.fillStyle = '#fbbf24'; ctx.strokeStyle = '#dc2626'; ctx.lineWidth = 4; ctx.font = 'bold 52px serif'; ctx.strokeText('COMPLIMENTI!', canvas.width / 2, vc); ctx.fillText('COMPLIMENTI!', canvas.width / 2, vc); ctx.font = 'bold 42px serif'; ctx.strokeText('HAI MESSO A TACERE', canvas.width / 2, vc + 60); ctx.fillText('HAI MESSO A TACERE', canvas.width / 2, vc + 60); ctx.strokeText('GLI SCONTENTI', canvas.width / 2, vc + 110); ctx.fillText('GLI SCONTENTI', canvas.width / 2, vc + 110); ctx.fillStyle = '#ffffff'; ctx.font = 'bold 32px serif'; ctx.fillText(`💰 Fondi accumulati: €${animatedCoins}`, canvas.width / 2, vc + 180); ctx.fillStyle = '#ff4444'; ctx.fillText(`👷 Cittadini zittiti: ${animatedFired}`, canvas.width / 2, vc + 225); ctx.fillStyle = '#ff9900'; ctx.fillText(`✊ NO TRAM zittiti: ${animatedStrikers}`, canvas.width / 2, vc + 270);
         if (allDone) { const vicAudio = document.getElementById("victoryMusic"); if (vicAudio && vicAudio.paused) { if (backgroundMusic) backgroundMusic.pause(); vicAudio.play().catch(e => console.log("Errore audio Vittoria:", e)); } if (stepTimer > 0) stepTimer--; else donationStep = 1; }
       } else if (donationStep === 1) {
         ctx.fillStyle = '#fff'; ctx.font = 'bold 36px serif'; ctx.fillText('VUOI RISARCIRE AI BOLOGNESI I', canvas.width / 2, canvas.height / 2 - 80); ctx.fillStyle = '#22c55e'; ctx.font = 'bold 48px serif'; ctx.fillText(`€${coins}`, canvas.width / 2, canvas.height / 2 - 30); ctx.fillStyle = '#fff'; ctx.font = 'bold 32px serif'; ctx.fillText('SPERPERATI', canvas.width / 2, canvas.height / 2 + 15); ctx.fillText('PER IL MALGOVERNO?', canvas.width / 2, canvas.height / 2 + 55); const shake = noAttempts > 0 && Math.floor(Date.now() / 100) % 2 === 0 ? 3 : 0; ctx.fillStyle = '#22c55e'; ctx.strokeStyle = '#166534'; ctx.lineWidth = 4; ctx.beginPath(); ctx.roundRect(buttonYesRect.x + shake, buttonYesRect.y, buttonYesRect.w, buttonYesRect.h, 15); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#fff'; ctx.font = 'bold 32px Arial'; ctx.fillText('SÌ', buttonYesRect.x + buttonYesRect.w / 2 + shake, buttonYesRect.y + 42); ctx.fillStyle = '#ef4444'; ctx.strokeStyle = '#991b1b'; ctx.lineWidth = 4; ctx.beginPath(); ctx.roundRect(buttonNoRect.x, buttonNoRect.y, buttonNoRect.w, buttonNoRect.h, 15); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#fff'; ctx.font = 'bold 32px Arial'; ctx.fillText('NO', buttonNoRect.x + buttonNoRect.w / 2, buttonNoRect.y + 42); if (noAttempts > 0) { ctx.fillStyle = '#fbbf24'; ctx.font = 'bold 20px Arial'; ctx.fillText(`Tentativi falliti: ${noAttempts}`, canvas.width / 2, canvas.height / 2 + 180); }
