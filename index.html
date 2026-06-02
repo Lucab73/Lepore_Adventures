@@ -726,11 +726,11 @@ coinList.push({
                  // Livello 1: solo normal; Livello 2+: aggiunge pensionato; Livello 3+: aggiunge commerciante
                  let citizenTypes;
 if (lvl === 1) {
-    citizenTypes = ['normal', 'normal', 'normal', 'pendolare'];
+    citizenTypes = ['normal'];
 } else if (lvl === 2) {
-    citizenTypes = ['normal', 'normal', 'pensionato', 'pensionato'];
+    citizenTypes = ['normal', 'pensionato'];
 } else {
-    citizenTypes = ['normal', 'pensionato', 'commerciante', 'normal'];
+    citizenTypes = ['normal', 'pensionato', 'commerciante'];
 }
                  const randomType = citizenTypes[Math.floor(Math.random() * citizenTypes.length)];
                  enemies.push({ x: centerX, y: py - 70, width: 50, height: 70, vx: speed, originalVx: speed, facing: 1, type: randomType, platformX: platform.x, platformW: pw, walkFrame: 0, state: 'walking', timer: Math.floor(Math.random() * 290) + 10, currentPhrase: "", isFired: false, parentPlatform: parentRef });
